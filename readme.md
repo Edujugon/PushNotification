@@ -4,7 +4,7 @@ This is is a light and easy to use package to send push notification.
 
 ## Usage
 
-Instance the Class
+Let's create the object.
 
     $push = new PushNotification;
 
