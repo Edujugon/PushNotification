@@ -1,5 +1,5 @@
 {
-    "name": "edujugon/laravel-push-notification",
+    "name": "edujugon/push-notification",
     "description": "Package to send push notifications to either Android and IOS devices",
     "keywords": ["Laravel","push","notification","high","priority"],
     "license": "MIT",
