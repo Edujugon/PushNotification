@@ -15,7 +15,7 @@ class Gcm extends PushService implements PushServiceInterface
         $this->url = 'https://android.googleapis.com/gcm/send';
         
         $this->config = [
-            'priority' => 'high',
+            'priority' => 'normal',
             'dry_run' => false, // True, if you want to send a test notification
         ];
     }

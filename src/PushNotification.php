@@ -16,21 +16,10 @@ class PushNotification
     protected $client;
 
     /**
-     * Service to send notifications
+     * Push Service Provider
      * @var
      */
     protected $service;
-
-    /**
-     * Return property if exit otherwise null.
-     *
-     * @param $property
-     * @return null
-     */
-    public function __get($property){
-        return property_exists($this,$property) ? $this->$property : null;
-    }
-    
 
     /**
      * Devices' Token where send the notification
@@ -47,14 +36,36 @@ class PushNotification
     protected $message = [];
 
     /**
+     * Return property if exit otherwise null.
+     *
+     * @param $property
+     * @return null
+     */
+    public function __get($property){
+
+        if(property_exists($this,$property))
+        {
+            return $this->$property;
+        }
+
+        if(property_exists($this->service,$property))
+        {
+            return $this->service->$property;
+        }
+
+        return null;
+
+    }
+
+    /**
      * Set the message of the notification.
      *
-     * @param array $data
+     * @param array/string $data
      * @return $this
      */
-    public function setMessage(array $data)
+    public function setMessage($data)
     {
-        $this->message = $data;
+        $this->message = is_array($data)? $data : array('message' => $data);
 
         return $this;
     }
@@ -86,7 +97,7 @@ class PushNotification
      * @param array $config
      * @return $this
      */
-    public function setServiceConfig(array $config)
+    public function setConfig(array $config)
     {
         $this->service->setConfig($config);
 
@@ -108,13 +119,13 @@ class PushNotification
 
     /**
      * Send Push Notification
+     * 
      * @param  \GuzzleHttp\Client client
-     * @return JSON  GCM Response
+     * @return boolean true|false
      */
     public function send(){
 
-        $response =  $this->service->send($this->client,$this->devices_token,$this->message);
+        return $this->service->send($this->client,$this->devices_token,$this->message);
 
-        return $response;
     }
 }
