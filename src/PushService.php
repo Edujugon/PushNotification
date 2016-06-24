@@ -77,5 +77,5 @@ abstract class PushService
     public function __get($property){
         return property_exists($this,$property) ? $this->$property : null;
     }
-    
+
 }

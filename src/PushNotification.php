@@ -113,8 +113,8 @@ class PushNotification
      */
     public function send(){
 
-        $this->service->send($this->client,$this->devices_token,$this->message);
-        
-        return true;
+        $response =  $this->service->send($this->client,$this->devices_token,$this->message);
+
+        return $response;
     }
 }

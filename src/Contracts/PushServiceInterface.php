@@ -12,6 +12,6 @@ interface PushServiceInterface
 
     function setConfig(array $config);
 
-    function send(\GuzzleHttp\Client $client, array $deviceTokens, array $message);
+    function send($client, array $deviceTokens, array $message);
 
 }

@@ -42,24 +42,34 @@ class Gcm extends PushService implements PushServiceInterface
      * @param array $message
      * @return JSON  GCM Response
      */
-    public function send(\GuzzleHttp\Client $client,array $deviceTokens,array $message){
+    public function send($client,array $deviceTokens,array $message){
         
         $fields = $this->addRequestFields($deviceTokens,$message);
 
         $headers = $this->addRequestHeaders();
 
-        $result = $client->post(
-            $this->url,
-            [
-                'headers' => $headers,
-                'json' => $fields,
-            ]
-        );
+        try
+        {
+            $result = $client->post(
+                $this->url,
+                [
+                    'headers' => $headers,
+                    'json' => $fields,
+                ]
+            );
 
-        $json = $result->getBody();
-        $this->setFeedback(json_decode($json));
+            $json = $result->getBody();
 
-        return true;
+            $this->setFeedback(json_decode($json));
+
+            return true;
+
+        }catch (\Exception $e)
+        {
+            $this->setFeedback($e->getMessage());
+
+            return false;
+        }
 
     }
 }
