@@ -28,7 +28,7 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
         $this->assertTrue(isset($this->push->feedback->error));
     }
 
-    public function test_push_response()
+    public function test_get_unregistered_device_tokens()
     {
         $this->push->setApiKey('AIzaSyBIs2KtnE2cSaFvKaB8pWO-zpNxSGF2sg0')
             ->setDevicesToken([
@@ -39,7 +39,7 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
             ->setMessage('hello world')
             ->send();
 
-        //var_dump($this->push->service->feedback);
+        $this->assertCount(1,$this->push->getUnregisteredDeviceTokens());
 
     }
 

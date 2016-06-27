@@ -105,3 +105,12 @@ or
     if(isset($push->feedback->error)){
         ....
     }
+
+### Get Unregistered Devices tokens
+
+After sending a notification, you may retrieve the list of unregistered tokens
+
+    $push->getUnregisteredDeviceTokens();
+
+This method returns an array of unregistered tokens from the Push service provider. If there aren't any unregistered tokens, returns an empty array.
+
