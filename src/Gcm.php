@@ -14,10 +14,7 @@ class Gcm extends PushService implements PushServiceInterface
     {
         $this->url = 'https://android.googleapis.com/gcm/send';
         
-        $this->config = [
-            'priority' => 'normal',
-            'dry_run' => false, // True, if you want to send a test notification
-        ];
+        $this->config = $this->initializeConfig('gcm');
     }
 
     private function addRequestFields($deviceTokens,$message){
@@ -62,13 +59,15 @@ class Gcm extends PushService implements PushServiceInterface
 
             $this->setFeedback(json_decode($json));
 
-            return true;
-
         }catch (\Exception $e)
         {
-            $this->setFeedback($e->getMessage());
+            $response = ['success' => false, 'error' => $e->getMessage()];
+            
+            $this->setFeedback(json_decode(json_encode($response), FALSE));
 
-            return false;
+        }finally
+        {
+            return $this->feedback;
         }
 
     }

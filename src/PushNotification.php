@@ -56,7 +56,7 @@ class PushNotification
         return null;
 
     }
-
+    
     /**
      * Set the message of the notification.
      *
@@ -65,7 +65,7 @@ class PushNotification
      */
     public function setMessage($data)
     {
-        $this->message = is_array($data)? $data : array('message' => $data);
+        $this->message = is_array($data) ? $data : array('message' => $data);
 
         return $this;
     }
@@ -106,13 +106,12 @@ class PushNotification
 
     /**
      * PushNotification constructor.
-     * @param Client $client
      * @param PushServiceInterface $service By default GCM
      * @internal param string $api_key
      */
-    public function __construct(Client $client = null, PushServiceInterface $service = null)
+    public function __construct(PushServiceInterface $service = null)
     {
-        $this->client = $client ?: new Client;
+        $this->client = new Client;
         
         $this->service = $service ?: new Gcm;
     }

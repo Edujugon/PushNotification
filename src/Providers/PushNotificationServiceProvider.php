@@ -14,7 +14,11 @@ class PushNotificationServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        $config_path = function_exists('config_path') ? config_path('pushnotification.php') : 'pushnotification.php';
+
+        $this->publishes([
+            __DIR__.'/../Config/config.php' => $config_path
+        ], 'config');
     }
 
     /**
@@ -24,7 +28,7 @@ class PushNotificationServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app['pushNotification'] = $this->app->share(function($app)
+        $this->app['edujugonPushNotification'] = $this->app->share(function($app)
         {
             return new PushNotification();
         });

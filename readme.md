@@ -1,28 +1,53 @@
 # PushNotification Package
 
-This is is a light and easy to use package to send push notification.
+This is a lightly and easy to use package to send push notification.
+
+## Instalation
+
+Update your composer.json file.
+
+    "edujugon/push-notification": "dev-master"
+
+Then
+
+    composer update
+
+## Laravel 5.*
+
+Register the PushNotification service by adding it to the providers array.
+
+    'providers' => array(
+        ...
+        Edujugon\PushNotification\Providers\PushNotificationServiceProvider::class
+    )
+
+Let's add the Alias facade, add it to the aliases array.
+
+    'aliases' => array(
+        ...
+        'PushNotification' => Edujugon\PushNotification\Facades\PushNotification::class,
+    )
+
+Publish the package's configuration file to the application's own config directory
+
+    php artisan vendor:publish --provider="Edujugon\PushNotification\Providers\PushNotificationServiceProvider" --tag="config"
 
 ## Usage
-
-Let's create the object.
 
     $push = new PushNotification;
 
 By default it will use:
 
-*   GuzzleHttp\Client as Http client.
 *   GCM as Push Service provider.
 
 ### Push Service configuration
 
-By default Gcm is been used.
-
-The default configuration fields are:
+The default configuration parameters are:
 
 *   priority => normal
 *   dry_run => false
 
-You can easily change those values or adding new ones calling the method setConfig like so:
+You can dynamically update those values or adding new ones calling the method setConfig like so:
 
     $push->setConfig(
         'priority' => 'high',
@@ -60,13 +85,13 @@ Sending only a message field?
 
 ### Send the Notification
 
-Method send return true or false.
+Method send() returns Push service Respose as an Object (stdClass).
 
     $push->send();
 
 ### Review the Notification Response
 
-If you want to see the push service response
+If you want to retrieve the push service response again, then:
 
     $push->feedback;
 
@@ -74,3 +99,9 @@ or
 
     $push->service->feedback;
 
+
+### Check if there was any error sending the push notification
+
+    if(isset($push->feedback->error)){
+        ....
+    }

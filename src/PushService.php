@@ -31,9 +31,9 @@ abstract class PushService
 
     /**
      * Push Server Response
-     * @var json
+     * @var object
      */
-    protected $feedback = 'Nothing Yet :)';
+    protected $feedback;
 
     /**
      * @param string $url
@@ -52,7 +52,7 @@ abstract class PushService
     }
 
     /**
-     * @param stdClass $feedback
+     * @param object $feedback
      */
     public function setFeedback($feedback)
     {
@@ -66,6 +66,26 @@ abstract class PushService
     public function setConfig(array $config)
     {
         $this->config = array_replace($this->config,$config);
+    }
+
+    /**
+     * Initialize the configuration for the chosen push service // gcm,etc..
+     * Check if config_path exist as function 
+     * 
+     * @param $service
+     * @return mixed
+     */
+    public function initializeConfig($service)
+    {
+        if(function_exists('config_path'))
+        {
+            $configuration = include(config_path('pushnotification.php'));
+        }else
+        {
+            $configuration = include(__DIR__ . '/Config/config.php');
+        }
+        
+        return $configuration[$service];
     }
 
     /**

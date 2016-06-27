@@ -1,6 +1,6 @@
 {
     "name": "edujugon/push-notification",
-    "description": "Package to send push notifications to either Android and IOS devices",
+    "description": "Package to send push notifications to Android and IOS devices",
     "keywords": ["Laravel","push","notification","high","priority"],
     "license": "MIT",
     "authors": [
@@ -9,7 +9,6 @@
             "email": "edujugon@hotmail.com"
         }
     ],
-    "minimum-stability": "dev",
     "require": {
         "php" : ">=5.5.0",
         "guzzlehttp/guzzle": "^6.2",
@@ -22,5 +21,6 @@
       "psr-4": {
         "Edujugon\\PushNotification\\": "src/"
       }
-    }
+    },
+    "minimum-stability": "dev"
 }
