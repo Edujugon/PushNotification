@@ -17,6 +17,36 @@ class Gcm extends PushService implements PushServiceInterface
         $this->config = $this->initializeConfig('gcm');
     }
 
+    /**
+     *Provide the unregistered tokens of the notification sent.
+     *
+     * @return array $tokenUnRegistered
+     */
+    public function getUnregisteredDeviceTokens($devices_token)
+    {
+        /**
+         * If there is any failure sending the notification
+         */
+        if($this->feedback && $this->feedback->failure)
+        {
+
+            $unRegisteredTokens = $devices_token;
+
+            /**
+             * Walk the array looking for any error.
+             * If no error, unset it from all token list which will become the unregistered tokens array.
+             */
+            foreach ($this->feedback->results as $key => $message)
+            {
+                if(! isset($message->error)) unset( $unRegisteredTokens[$key] );
+            }
+
+            return $unRegisteredTokens;
+        }
+
+        return [];
+    }
+
     private function addRequestFields($deviceTokens,$message){
         return [
             'registration_ids'  => $deviceTokens,

@@ -111,27 +111,7 @@ class PushNotification
      */
     public function getUnregisteredDeviceTokens()
     {
-        /**
-         * If there is any failure sending the notification
-         */
-        if($this->feedback && $this->feedback->failure)
-        {
-
-            $tokens = $this->devices_token;
-
-            /**
-             * Walk the array looking for any error.
-             * If error, get the key and unset it from all token list
-             */
-            foreach ($this->service->feedback->results as $key => $message)
-            {
-                if(! isset($message->error)) unset( $tokens[$key] );
-            }
-
-            return $tokens;
-        }
-
-        return [];
+        return $this->service->getUnregisteredDeviceTokens($this->devices_token);
     }
 
     /**
