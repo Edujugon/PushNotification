@@ -36,25 +36,14 @@ class PushNotification
     protected $message = [];
 
     /**
-     * Return property if exit otherwise null.
-     *
-     * @param $property
-     * @return null
+     * PushNotification constructor.
+     * @param PushServiceInterface $service By default GCM
      */
-    public function __get($property){
+    public function __construct(PushServiceInterface $service = null)
+    {
+        $this->client = new Client;
 
-        if(property_exists($this,$property))
-        {
-            return $this->$property;
-        }
-
-        if(property_exists($this->service,$property))
-        {
-            return $this->service->$property;
-        }
-
-        return null;
-
+        $this->service = $service ?: new Gcm;
     }
     
     /**
@@ -115,18 +104,6 @@ class PushNotification
     }
 
     /**
-     * PushNotification constructor.
-     * @param PushServiceInterface $service By default GCM
-     * @internal param string $api_key
-     */
-    public function __construct(PushServiceInterface $service = null)
-    {
-        $this->client = new Client;
-        
-        $this->service = $service ?: new Gcm;
-    }
-
-    /**
      * Send Push Notification
      * 
      * @param  \GuzzleHttp\Client client
@@ -135,6 +112,28 @@ class PushNotification
     public function send(){
 
         return $this->service->send($this->client,$this->devices_token,$this->message);
+
+    }
+
+    /**
+     * Return property if exit here or in service property, otherwise null.
+     *
+     * @param $property
+     * @return null
+     */
+    public function __get($property){
+
+        if(property_exists($this,$property))
+        {
+            return $this->$property;
+        }
+
+        if(property_exists($this->service,$property))
+        {
+            return $this->service->$property;
+        }
+
+        return null;
 
     }
 }

@@ -8,7 +8,6 @@ class Gcm extends PushService implements PushServiceInterface
     
     /**
      * Gcm constructor.
-     * 
      */
     public function __construct()
     {
