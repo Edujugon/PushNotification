@@ -62,6 +62,23 @@ class Apn extends PushService implements PushServiceInterface
     }
 
     /**
+     * Check if the certificate file exist.
+     * @return bool
+     */
+    private function existCertificate()
+    {
+        $certificate = $this->config['certificate'];
+        if(!file_exists($certificate))
+        {
+            $response = ['success' => false, 'error' => "Please, add your APN certificate to: $certificate" . PHP_EOL];
+
+            $this->setFeedback(json_decode(json_encode($response), FALSE));
+
+            return false;
+        }
+        return true;
+    }
+    /**
      * Create the connection to APNS server
      * If some error, the error is stored in class feedback property.
      * IF OKAY, return connection
@@ -70,8 +87,11 @@ class Apn extends PushService implements PushServiceInterface
      */
     private function openConnectionAPNS()
     {
-        $passphrase = $this->config['passPhrase'];
+
+        if(!$this->existCertificate()) return false;
+
         $certificate = $this->config['certificate'];
+        $passphrase = $this->config['passPhrase'];
 
         $ctx = stream_context_create();
         stream_context_set_option($ctx, 'ssl', 'local_cert', $certificate);
