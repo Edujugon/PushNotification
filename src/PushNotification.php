@@ -3,17 +3,9 @@ namespace Edujugon\PushNotification;
 
 
 use Edujugon\PushNotification\Contracts\PushServiceInterface;
-use GuzzleHttp\Client;
 
 class PushNotification
 {
-
-    /**
-     * Client to do the request
-     *
-     * @var \GuzzleHttp\Client $client
-     */
-    protected $client;
 
     /**
      * Push Service Provider
@@ -41,8 +33,6 @@ class PushNotification
      */
     public function __construct(PushServiceInterface $service = null)
     {
-        $this->client = new Client;
-
         $this->service = $service ?: new Gcm;
     }
     
@@ -111,7 +101,7 @@ class PushNotification
      */
     public function send(){
 
-        return $this->service->send($this->client,$this->devices_token,$this->message);
+        return $this->service->send($this->devices_token,$this->message);
 
     }
 

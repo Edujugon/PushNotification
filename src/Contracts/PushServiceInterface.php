@@ -12,6 +12,10 @@ interface PushServiceInterface
 
     function setConfig(array $config);
 
-    function send($client, array $deviceTokens, array $message);
+    function setFeedback($feedback);
+
+    function send(array $deviceTokens, array $message): \stdClass;
+
+    function getUnregisteredDeviceTokens(array $devices_token): array;
 
 }

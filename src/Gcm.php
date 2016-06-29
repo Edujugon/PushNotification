@@ -2,6 +2,7 @@
 namespace Edujugon\PushNotification;
 
 use Edujugon\PushNotification\Contracts\PushServiceInterface;
+use GuzzleHttp\Client;
 
 class Gcm extends PushService implements PushServiceInterface
 {
@@ -14,14 +15,24 @@ class Gcm extends PushService implements PushServiceInterface
         $this->url = 'https://android.googleapis.com/gcm/send';
         
         $this->config = $this->initializeConfig('gcm');
+        $this->client = new Client;
     }
+
+
+    /**
+     * Client to do the request
+     *
+     * @var \GuzzleHttp\Client $client
+     */
+    protected $client;
 
     /**
      * Provide the unregistered tokens of the notification sent.
      *
+     * @param array $devices_token
      * @return array $tokenUnRegistered
      */
-    public function getUnregisteredDeviceTokens($devices_token)
+    public function getUnregisteredDeviceTokens(array $devices_token) : array
     {
         /**
          * If there is any failure sending the notification
@@ -65,15 +76,16 @@ class Gcm extends PushService implements PushServiceInterface
      * @param \GuzzleHttp\Client client
      * @param  array $deviceTokens
      * @param array $message
-     * @return JSON  GCM Response
+     * @return \stdClass  GCM Response
      */
-    public function send($client,array $deviceTokens,array $message){
+    public function send(array $deviceTokens,array $message) : \stdClass
+    {
 
         $fields = $this->addRequestFields($deviceTokens,$message);
         $headers = $this->addRequestHeaders();
         try
         {
-            $result = $client->post(
+            $result = $this->client->post(
                 $this->url,
                 [
                     'headers' => $headers,

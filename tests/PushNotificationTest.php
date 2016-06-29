@@ -64,4 +64,40 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
 
         $this->assertInternalType('array',$this->push->config);
     }
+
+    public function test_apn_service(){
+        $this->push = new PushNotification(new \Edujugon\PushNotification\Apn());
+
+        $message = [
+            'aps' => [
+                'alert' => [
+                    'title' => 'This is the title',
+                    'body' => 'This is the body'
+                ],
+                'sound' => 'default'
+
+            ],
+            'extraPayLoad' => [
+                'title' => 'This is the title',
+                'body' => 'This is the body',
+            ]
+        ];
+
+        $this->push->setMessage($message)
+            ->setDevicesToken([
+                '91d70094420a01072a520a621990c276f179471a57e64d0cef5bdda4a9bc22e8',
+                '123123aasfasfd',
+                'asdfwef'
+            ]);
+        $this->assertInstanceOf('stdClass',$this->push->send());
+        $this->assertCount(2,$this->push->getUnregisteredDeviceTokens());
+
+        //test getUnregisteredDevices without errors
+        $this->push->setDevicesToken([
+                '91d70094420a01072a520a621990c276f179471a57e64d0cef5bdda4a9bc22e8'
+            ])->send();
+        $this->assertInstanceOf('stdClass',$this->push->send());
+        $this->assertInternalType('array',$this->push->getUnregisteredDeviceTokens());
+        $this->assertCount(0,$this->push->getUnregisteredDeviceTokens());
+    }
 }
