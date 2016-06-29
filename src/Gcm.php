@@ -17,7 +17,7 @@ class Gcm extends PushService implements PushServiceInterface
     }
 
     /**
-     *Provide the unregistered tokens of the notification sent.
+     * Provide the unregistered tokens of the notification sent.
      *
      * @return array $tokenUnRegistered
      */
@@ -47,11 +47,10 @@ class Gcm extends PushService implements PushServiceInterface
     }
 
     private function addRequestFields($deviceTokens,$message){
-        return [
+        return array_merge($this->config,[
             'registration_ids'  => $deviceTokens,
-            'data'     => $message,
-            'dry_run' => $this->config['dry_run']
-        ];
+            'data'     => $message
+        ]);
     }
 
     private function addRequestHeaders(){
@@ -69,11 +68,9 @@ class Gcm extends PushService implements PushServiceInterface
      * @return JSON  GCM Response
      */
     public function send($client,array $deviceTokens,array $message){
-        
+
         $fields = $this->addRequestFields($deviceTokens,$message);
-
         $headers = $this->addRequestHeaders();
-
         try
         {
             $result = $client->post(
