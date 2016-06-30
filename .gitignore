@@ -1,5 +1,4 @@
 vendor/
 composer.lock
 .idea
-src/Config/config.php
 src/Config/iosCertificates/ck.pem
