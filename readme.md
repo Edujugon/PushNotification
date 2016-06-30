@@ -36,13 +36,17 @@ Publish the package's configuration file to the application's own config directo
 
     $push = new PushNotification;
 
-By default it will use:
+By default it will use GCM as Push Service provider.
 
-*   GCM as Push Service provider.
+If you want to use APNS:
+
+    $push = new PushNotification(new \Edujugon\PushNotification\Apn());
 
 ### Push Service configuration
 
-The default configuration parameters are:
+The default configuration for all Push service providers is located in Config/config.php
+
+The default configuration parameters for GCM are :
 
 *   priority => normal
 *   dry_run => false
@@ -54,6 +58,17 @@ You can dynamically update those values or adding new ones calling the method se
         'dry_run' => true,
         'time_to_live' => 3
     );
+
+
+The default configuration parameters for APNS are:
+
+*   certificate => __DIR__ . '/iosCertificates/yourCertificate.pem'
+*   passPhrase => 'MyPassPhrase'
+
+Also you can update those values and add more dynamically
+
+    $this->push->setConfig(['passPhrase' => 'NewPass','custom' => 'MycustomValue']);
+
 
 ### Filling the Notification options
 
@@ -79,9 +94,22 @@ If you want send the notification to only 1 device, you may pass the value as st
 
     $push->setDevicesToken('deviceToken');
 
-Sending only a message field?
 
-    $push->setMessage('My message here..');
+APNS message could be like so:
+
+    $this->push->setMessage([
+                'aps' => [
+                    'alert' => [
+                        'title' => 'This is the title',
+                        'body' => 'This is the body'
+                    ],
+                    'sound' => 'default'
+
+                ],
+                'extraPayLoad' => [
+                    'custom' => 'My custom data',
+                ]
+            ]);
 
 ### Send the Notification
 

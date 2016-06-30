@@ -73,7 +73,6 @@ class Gcm extends PushService implements PushServiceInterface
 
     /**
      * Send Push Notification
-     * @param \GuzzleHttp\Client client
      * @param  array $deviceTokens
      * @param array $message
      * @return \stdClass  GCM Response

@@ -39,19 +39,19 @@ class PushNotification
     /**
      * Set the message of the notification.
      *
-     * @param array/string $data
+     * @param array $data
      * @return $this
      */
-    public function setMessage($data)
+    public function setMessage(array $data)
     {
-        $this->message = is_array($data) ? $data : array('message' => $data);
+        $this->message = $data;
 
         return $this;
     }
 
 
     /**
-     * @param array $devices_token
+     * @param array/string $devices_token
      * @return $this
      */
     public function setDevicesToken($devices_token)

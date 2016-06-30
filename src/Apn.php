@@ -88,8 +88,6 @@ class Apn extends PushService implements PushServiceInterface
     private function openConnectionAPNS()
     {
 
-        if(!$this->existCertificate()) return false;
-
         $certificate = $this->config['certificate'];
         $passphrase = $this->config['passPhrase'];
 
@@ -115,13 +113,14 @@ class Apn extends PushService implements PushServiceInterface
 
     /**
      * Send Push Notification
-     * @param \GuzzleHttp\Client client
      * @param  array $deviceTokens
      * @param array $message
      * @return \stdClass  GCM Response
      */
     public function send(array $deviceTokens,array $message) : \stdClass
     {
+        
+        if(!$this->existCertificate()) return $this->feedback;
 
         $fp = $this->openConnectionAPNS();
         if(!$fp) return $this->feedback;
