@@ -72,11 +72,30 @@ Also you can update those values and add more dynamically
 
 ### Filling the Notification options
 
-You can chain the methods
+You can chain the methods when load the notification options.
+
+GCM sample:
 
     $push->setMessage(['message'=>'This is the message','title'=>'This is the title'])
                     ->setApiKey('Server-API-Key')
                     ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...]);
+
+APNS sample:
+
+    $this->push->setMessage([
+                'aps' => [
+                    'alert' => [
+                        'title' => 'This is the title',
+                        'body' => 'This is the body'
+                    ],
+                    'sound' => 'default'
+
+                ],
+                'extraPayLoad' => [
+                    'custom' => 'My custom data',
+                ]
+            ])
+        ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...]);
 
 or do it separately
 
@@ -93,23 +112,6 @@ or do it separately
 If you want send the notification to only 1 device, you may pass the value as string.
 
     $push->setDevicesToken('deviceToken');
-
-
-APNS message could be like so:
-
-    $this->push->setMessage([
-                'aps' => [
-                    'alert' => [
-                        'title' => 'This is the title',
-                        'body' => 'This is the body'
-                    ],
-                    'sound' => 'default'
-
-                ],
-                'extraPayLoad' => [
-                    'custom' => 'My custom data',
-                ]
-            ]);
 
 ### Send the Notification
 

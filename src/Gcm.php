@@ -32,7 +32,7 @@ class Gcm extends PushService implements PushServiceInterface
      * @param array $devices_token
      * @return array $tokenUnRegistered
      */
-    public function getUnregisteredDeviceTokens(array $devices_token) : array
+    public function getUnregisteredDeviceTokens(array $devices_token)
     {
         /**
          * If there is any failure sending the notification
@@ -77,7 +77,7 @@ class Gcm extends PushService implements PushServiceInterface
      * @param array $message
      * @return \stdClass  GCM Response
      */
-    public function send(array $deviceTokens,array $message) : \stdClass
+    public function send(array $deviceTokens,array $message)
     {
 
         $fields = $this->addRequestFields($deviceTokens,$message);

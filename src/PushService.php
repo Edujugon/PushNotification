@@ -92,6 +92,19 @@ abstract class PushService
     }
 
     /**
+     * Initialize the feedback array
+     * @return array
+     */
+    protected function initializeFeedback()
+    {
+        return ['success' => true,
+            'success' => 0,
+            'failure' => 0,
+            'tokenFailList' => []
+        ];
+    }
+    
+    /**
      * Return property if exit otherwise null.
      *
      * @param $property

@@ -17,7 +17,8 @@ class PushNotificationServiceProvider extends ServiceProvider
         $config_path = function_exists('config_path') ? config_path('pushnotification.php') : 'pushnotification.php';
 
         $this->publishes([
-            __DIR__.'/../Config/config.php' => $config_path
+            __DIR__.'/../Config/config.php' => $config_path,
+            __DIR__.'/../Config/iosCertificates' => config_path('iosCertificates/')
         ], 'config');
     }
 

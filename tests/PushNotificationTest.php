@@ -38,7 +38,7 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
             ->setConfig(['dry_run' => true])
             ->setMessage(['message' =>'hello world'])
             ->send();
-
+        var_dump($this->push->feedback);
         $this->assertCount(1,$this->push->getUnregisteredDeviceTokens());
 
     }
@@ -77,9 +77,9 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
                 'sound' => 'default'
 
             ],
-            'extraPayLoad' => [
-                'title' => 'This is the title',
-                'body' => 'This is the body',
+            'data' => [
+                'text' => 'This the text',
+                'client_url' => 'http://bing.com',
             ]
         ];
 

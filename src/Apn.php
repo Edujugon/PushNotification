@@ -36,25 +36,12 @@ class Apn extends PushService implements PushServiceInterface
     }
 
     /**
-     * Compose the feedback array
-     * @return array
-     */
-    private function initializeFeedback()
-    {
-        return ['success' => true,
-            'success' => 0,
-            'failure' => 0,
-            'tokenFailList' => []
-        ];
-    }
-
-    /**
      * Provide the unregistered tokens of the notification sent.
      *
      * @param array $devices_token
      * @return array
      */
-    public function getUnregisteredDeviceTokens(array $devices_token) : array
+    public function getUnregisteredDeviceTokens(array $devices_token)
     {
         if(! empty($this->feedback->tokenFailList))
             return $this->feedback->tokenFailList;
@@ -117,7 +104,7 @@ class Apn extends PushService implements PushServiceInterface
      * @param array $message
      * @return \stdClass  GCM Response
      */
-    public function send(array $deviceTokens,array $message) : \stdClass
+    public function send(array $deviceTokens,array $message)
     {
         
         if(!$this->existCertificate()) return $this->feedback;
@@ -144,7 +131,7 @@ class Apn extends PushService implements PushServiceInterface
             }
 
 
-            // Send it to the server
+            // Send the notification to the server
             $result = fwrite($fp, $msg, strlen($msg));
 
             if (!$result)
