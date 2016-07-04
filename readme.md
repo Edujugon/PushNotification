@@ -53,11 +53,11 @@ The default configuration parameters for GCM are :
 
 You can dynamically update those values or adding new ones calling the method setConfig like so:
 
-    $push->setConfig(
+    $push->setConfig([
         'priority' => 'high',
         'dry_run' => true,
         'time_to_live' => 3
-    );
+    ]);
 
 
 The default configuration parameters for APNS are:
