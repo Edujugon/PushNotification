@@ -97,13 +97,13 @@ abstract class PushService
      */
     protected function initializeFeedback()
     {
-        return ['success' => true,
+        return [
             'success' => 0,
             'failure' => 0,
             'tokenFailList' => []
         ];
     }
-    
+
     /**
      * Return property if exit otherwise null.
      *

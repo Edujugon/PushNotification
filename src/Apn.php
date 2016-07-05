@@ -57,7 +57,7 @@ class Apn extends PushService implements PushServiceInterface
         $certificate = $this->config['certificate'];
         if(!file_exists($certificate))
         {
-            $response = ['success' => false, 'error' => "Please, add your APN certificate to: $certificate" . PHP_EOL];
+            $response = ['success' => false, 'error' => "Please, add your APN certificate to your service configuration file." . PHP_EOL];
 
             $this->setFeedback(json_decode(json_encode($response), FALSE));
 

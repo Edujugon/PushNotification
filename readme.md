@@ -67,7 +67,7 @@ The default configuration parameters for APNS are:
 
 Also you can update those values and add more dynamically
 
-    $this->push->setConfig(['passPhrase' => 'NewPass','custom' => 'MycustomValue']);
+    $push->setConfig(['passPhrase' => 'NewPass','custom' => 'MycustomValue']);
 
 
 ### Filling the Notification options
@@ -82,7 +82,7 @@ GCM sample:
 
 APNS sample:
 
-    $this->push->setMessage([
+    $push->setMessage([
                 'aps' => [
                     'alert' => [
                         'title' => 'This is the title',

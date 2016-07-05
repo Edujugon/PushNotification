@@ -37,7 +37,7 @@ class Gcm extends PushService implements PushServiceInterface
         /**
          * If there is any failure sending the notification
          */
-        if($this->feedback && $this->feedback->failure)
+        if($this->feedback && isset($this->feedback->failure))
         {
 
             $unRegisteredTokens = $devices_token;

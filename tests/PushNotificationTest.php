@@ -5,68 +5,89 @@ use Edujugon\PushNotification\PushNotification;
 
 class PushNotificationTest extends PHPUnit_Framework_TestCase {
 
-    protected $push;
-
-    /**
-     * PushNotificationTest constructor.
-     * @param PushNotification $push
-     */
-    public function __construct()
+    /** @test */
+    public function assert_send_method_returns_an_stdClass_instance()
     {
-        $this->push = new PushNotification();
-    }
+        $push = new PushNotification();
 
-    public function test_send_notication()
-    {
-        $this->push->setMessage(['message'=>'Hello World'])
+        $push->setMessage(['message'=>'Hello World'])
                 ->setApiKey('XXofYyQx2SJbumNrs_hUS6Rkrv3W8asd')
                 ->setDevicesToken(['d1WaXouhHG34:AaPA91bF2byCOq-gexmHFqdysYX'])
                 ->setConfig(['dry_run' => true]);
         
-        $this->assertInstanceOf('stdClass',$this->push->send());
+        $this->assertInstanceOf('stdClass',$push->send());
 
-        $this->assertTrue(isset($this->push->feedback->error));
+    }
+    /** @test */
+    public function assert_there_is_an_array_key_called_error()
+    {
+        $push = new PushNotification();
+
+        $push->setMessage(['message'=>'Hello World'])
+            ->setApiKey('XXofYyQx2SJbumNrs_hUS6Rkrv3W8asd')
+            ->setDevicesToken(['d1WaXouhHG34:AaPA91bF2byCOq-gexmHFqdysYX'])
+            ->setConfig(['dry_run' => true])
+            ->send();
+
+        $this->assertTrue(isset($push->feedback->error));
     }
 
-    public function test_get_unregistered_device_tokens()
+    /** @test */
+    public function assert_unregistered_device_tokens_is_an_array()
     {
-        $this->push->setApiKey('AIzaSyBIs2KtnE2cSaFvKaB8pWO-zpNxSGF2sg0')
+        $push = new PushNotification();
+
+        $push->setApiKey('wefwef23f23fwef')
             ->setDevicesToken([
-                'eXoyga5obuM:APA91bGc1Nf_968qAmIzrrK48zJn2U2Kpos_0WuhabpZO9B_rFveB635X7Ksv7x6XCXQ9cvvpLMuxkaJ0ySpWPed3cvz0q4fuG1SXt40-oXH4R5dwYk4rQYTeds3nhWE5OKDmatFZaaZ',
-                'asfasdfasdf_968qAmIzrrK48zJn2U2Kpos_0WuhabpZO9B_rFveB635X7Ksv7x6XCXQ9cvvpLMuxkaJ0ySpWPed3cvz0q4fuG1SXt40-oXH4R5dwYk4rQYTeds3nhWE5OKDmatFZaaZ'
+                'asdfasdfasdfasdfXCXQ9cvvpLMuxkaJ0ySpWPed3cvz0q4fuG1SXt40-oasdf3nhWE5OKDmatFZaaZ',
+                'asfasdfasdf_96ssdfsWuhabpZO9Basvz0q4fuG1SXt40-oXH4R5dwYk4rQYTeds3nhWE5OKDmatFZaaZ'
             ])
             ->setConfig(['dry_run' => true])
             ->setMessage(['message' =>'hello world'])
             ->send();
-        var_dump($this->push->feedback);
-        $this->assertCount(1,$this->push->getUnregisteredDeviceTokens());
+
+        $this->assertInternalType('array',$push->getUnregisteredDeviceTokens());
 
     }
 
-    public function test_set_and_get_service_config(){
+    /** @test */
+    public function set_and_get_service_config(){
 
+        /** GCM */
+        $push = new PushNotification();
 
-        $this->push->setConfig(['time_to_live' => 3]);
+        $push->setConfig(['time_to_live' => 3]);
 
-        $this->assertArrayHasKey('time_to_live',$this->push->config);
+        $this->assertArrayHasKey('time_to_live',$push->config);
+        $this->assertArrayHasKey('priority',$push->config); //default key
+        $this->assertInternalType('array',$push->config);
+
+        /** APNS */
+        $pushAPN = new PushNotification(new \Edujugon\PushNotification\Apn());
+
+        $pushAPN->setConfig(['time_to_live' => 3]);
+
+        $this->assertArrayHasKey('time_to_live',$pushAPN->config);
+        $this->assertArrayHasKey('certificate',$pushAPN->config); //default key
+        $this->assertInternalType('array',$pushAPN->config);
     }
 
-    public function test_set_message_data(){
-        
-        $this->push->setMessage(['message' =>'hello world']);
+    /** @test */
+    public function set_message_data(){
 
-        $this->assertArrayHasKey('message',$this->push->message);
-        
-        //var_dump($this->push->message);
+        $push = new PushNotification();
+
+        $push->setMessage(['message' =>'hello world']);
+
+        $this->assertArrayHasKey('message',$push->message);
+
+        $this->assertEquals('hello world',$push->message['message']);
+
     }
 
-    public function test_config_usage(){
-
-        $this->assertInternalType('array',$this->push->config);
-    }
-
-    public function test_apn_service(){
-        $this->push = new PushNotification(new \Edujugon\PushNotification\Apn());
+    /** @test */
+    public function send_method_in_apn_service(){
+        $push = new PushNotification(new \Edujugon\PushNotification\Apn());
 
         $message = [
             'aps' => [
@@ -83,37 +104,24 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
             ]
         ];
 
-        $this->push->setMessage($message)
+        $push->setMessage($message)
             ->setDevicesToken([
-                '91d70094420a01072a520a621990c276f179471a57e64d0cef5bdda4a9bc22e8',
                 '123123aasfasfd',
                 'asdfwef'
             ]);
-        $this->assertInstanceOf('stdClass',$this->push->send());
-        $this->assertCount(2,$this->push->getUnregisteredDeviceTokens());
-
-        //test getUnregisteredDevices without errors
-        $this->push->setDevicesToken([
-                '91d70094420a01072a520a621990c276f179471a57e64d0cef5bdda4a9bc22e8'
-            ])->send();
-        $this->assertInstanceOf('stdClass',$this->push->send());
-        $this->assertInternalType('array',$this->push->getUnregisteredDeviceTokens());
-        $this->assertCount(0,$this->push->getUnregisteredDeviceTokens());
+        $this->assertInstanceOf('stdClass',$push->send());
+        $this->assertCount(2,$push->getUnregisteredDeviceTokens());
+        $this->assertInternalType('array',$push->getUnregisteredDeviceTokens());
     }
 
-    public function test_apn_config_set_and_get()
+    /** @test */
+    public function apn_without_certificate()
     {
-        $this->push = new PushNotification(new \Edujugon\PushNotification\Apn());
-        $this->push->setConfig(['custom' => 'Custom Value']);
+        $push = new PushNotification(new \Edujugon\PushNotification\Apn());
 
-        $this->assertArrayHasKey('custom',$this->push->config);
-    }
-
-    public function test_apn_no_certificate()
-    {
-        $this->push = new PushNotification(new \Edujugon\PushNotification\Apn());
-        $this->push->setConfig(['custom' => 'Custom Value','certificate' => 'MycustomValue']);
-        $this->push->send();
-        $this->assertTrue(isset($this->push->feedback->error));
+        $push->setConfig(['custom' => 'Custom Value','certificate' => 'MycustomValue']);
+        $push->send();
+        $this->assertTrue(isset($push->feedback->error));
+        $this->assertFalse($push->feedback->success);
     }
 }
