@@ -10,7 +10,7 @@ Update your composer.json file.
 
 Then
 
-    composer update
+    composer install
 
 ## Laravel 5.*
 
