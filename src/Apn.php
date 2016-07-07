@@ -42,11 +42,11 @@ class Apn extends PushService implements PushServiceInterface
 
         if(isset($this->config['dry_run']))
         {
-            if($this->config['dry_run'])
+            if($this->config['dry_run']){
+
                 $this->setUrl($this->sandbox_url);
 
-            if(!$this->config['dry_run'])
-                $this->setUrl($this->production_url);
+            }else $this->setUrl($this->production_url);
         }
     }
 
