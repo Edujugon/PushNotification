@@ -7,32 +7,47 @@ class Apn extends PushService implements PushServiceInterface
 {
 
     /**
-     * Gcm constructor.
+     * Url for development purposes
+     *
+     * @var string
+     */
+    private $sandbox_url = 'ssl://gateway.sandbox.push.apple.com:2195';
+
+    /**
+     * Url for production
+     *
+     * @var string
+     */
+    private $production_url = 'ssl://gateway.push.apple.com:2195';
+
+    /**
+     * Apn constructor.
      */
     public function __construct()
     {
-        $this->url = 'ssl://gateway.sandbox.push.apple.com:2195';
-        //production: gateway.push.apple.com
+        $this->url = $this->production_url;
 
         $this->config = $this->initializeConfig('apn');
     }
 
-    private function fillBody()
+    /**
+     * Call parent method.
+     * Check if there is dry_run parameter in config data. Set the service url according to the dry_run value.
+     *
+     * @param array $config
+     */
+    public function setConfig(array $config)
     {
-        return [
-            'aps' => [
-                'alert' => [
-                    'title' => 'This is the title',
-                    'body' => 'This is the body'
-                ],
-                'sound' => 'default'
+        parent::setConfig($config);
 
-            ],
-            'extraPayLoad' => [
-                'title' => 'This is the title',
-                'body' => 'This is the body',
-            ]
-        ];
+        if(isset($this->config['dry_run']))
+        {
+            if($this->config['dry_run'])
+                $this->setUrl($this->sandbox_url);
+
+            if(!$this->config['dry_run'])
+                $this->setUrl($this->production_url);
+        }
     }
 
     /**

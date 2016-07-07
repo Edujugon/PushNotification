@@ -7,6 +7,7 @@ return [
   ],
   'apn' => [
       'certificate' => __DIR__ . '/iosCertificates/ck.pem',
-      'passPhrase' => '123456'
+      'passPhrase' => '123456',
+      'dry_run' => false
   ]
 ];

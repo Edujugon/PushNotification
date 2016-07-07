@@ -8,7 +8,6 @@ abstract class PushService
 
     /**
      * Server Url for push hosting service
-     * By default GCM
      *
      * @var string
      */
@@ -60,7 +59,7 @@ abstract class PushService
     }
 
     /**
-     * Update the values by key on config array from the passed array.
+     * Update the values by key on config array from the passed array. If any key doesn't exist, it's added.
      * @param array $config
      */
     public function setConfig(array $config)

@@ -46,7 +46,7 @@ If you want to use APNS:
 
 The default configuration for all Push service providers is located in Config/config.php
 
-The default configuration parameters for GCM are :
+The default configuration parameters for **GCM** are :
 
 *   priority => normal
 *   dry_run => false
@@ -60,15 +60,25 @@ You can dynamically update those values or adding new ones calling the method se
     ]);
 
 
-The default configuration parameters for APNS are:
+The default configuration parameters for **APNS** are:
 
 *   certificate => __DIR__ . '/iosCertificates/yourCertificate.pem'
 *   passPhrase => 'MyPassPhrase'
+*   dry_run => false
 
 Also you can update those values and add more dynamically
 
-    $push->setConfig(['passPhrase' => 'NewPass','custom' => 'MycustomValue']);
+    $push->setConfig([
+        'passPhrase' => 'NewPass',
+        'custom' => 'MycustomValue',
+        'dry_run' => true
+    ]);
 
+Even you may update the url of the Push Service dynamically like so:
+
+    $puhs->setUrl('http://newPushServiceUrl.com');
+
+> Not update the url unless it's necessary.
 
 ### Filling the Notification options
 

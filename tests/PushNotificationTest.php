@@ -14,7 +14,7 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
                 ->setApiKey('XXofYyQx2SJbumNrs_hUS6Rkrv3W8asd')
                 ->setDevicesToken(['d1WaXouhHG34:AaPA91bF2byCOq-gexmHFqdysYX'])
                 ->setConfig(['dry_run' => true]);
-        
+
         $this->assertInstanceOf('stdClass',$push->send());
 
     }
@@ -109,7 +109,10 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
                 '123123aasfasfd',
                 'asdfwef'
             ]);
-        $this->assertInstanceOf('stdClass',$push->send());
+
+        $response = $push->send();
+
+        $this->assertInstanceOf('stdClass',$response);
         $this->assertCount(2,$push->getUnregisteredDeviceTokens());
         $this->assertInternalType('array',$push->getUnregisteredDeviceTokens());
     }
@@ -123,5 +126,17 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
         $push->send();
         $this->assertTrue(isset($push->feedback->error));
         $this->assertFalse($push->feedback->success);
+    }
+
+    /** @test */
+    public function apn_dry_run_option_update_the_apn_url()
+    {
+        $push = new PushNotification(new \Edujugon\PushNotification\Apn());
+
+        $this->assertEquals('ssl://gateway.push.apple.com:2195',$push->url);
+        
+        $push->setConfig(['dry_run'=>true]);
+
+        $this->assertEquals('ssl://gateway.sandbox.push.apple.com:2195',$push->url);
     }
 }
