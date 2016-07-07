@@ -14,6 +14,17 @@ class PushNotification
     protected $service;
 
     /**
+     * List of the available Push service providers
+     *
+     * @var array
+     */
+    protected $service_collection = [
+        'gcm' => Gcm::class,
+        'apn' => Apn::class,
+        'fcm' => Fcm::class
+    ];
+
+    /**
      * Devices' Token where send the notification
      *
      * @var array
@@ -31,9 +42,10 @@ class PushNotification
      * PushNotification constructor.
      * @param PushServiceInterface $service By default GCM
      */
-    public function __construct(PushServiceInterface $service = null)
+    public function __construct($service = null)
     {
-        $this->service = $service ?: new Gcm;
+        $this->service = !is_null($service) ? $this->service_collection[$service] : new Fcm;
+        var_dump($this->service);
     }
     
     /**

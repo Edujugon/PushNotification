@@ -57,14 +57,14 @@ class Gcm extends PushService implements PushServiceInterface
         return [];
     }
 
-    private function addRequestFields($deviceTokens,$message){
+    protected function addRequestFields($deviceTokens,$message){
         return array_merge($this->config,[
             'registration_ids'  => $deviceTokens,
             'data'     => $message
         ]);
     }
 
-    private function addRequestHeaders(){
+    protected function addRequestHeaders(){
         return [
             'Authorization' => 'key=' . $this->api_key,
             'Content-Type:' =>'application/json'

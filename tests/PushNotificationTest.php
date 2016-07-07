@@ -11,11 +11,13 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
         $push = new PushNotification();
 
         $push->setMessage(['message'=>'Hello World'])
-                ->setApiKey('XXofYyQx2SJbumNrs_hUS6Rkrv3W8asd')
-                ->setDevicesToken(['d1WaXouhHG34:AaPA91bF2byCOq-gexmHFqdysYX'])
+                ->setApiKey('AIzaSyAjsu5asdf4N9KyCxCB04')
+                ->setDevicesToken(['howoPaqCPp1pvVsBZ6QUHoEtO_S9-Esel4N7nqeUypQ6ah8MKZKo6jl'])
                 ->setConfig(['dry_run' => true]);
 
-        $this->assertInstanceOf('stdClass',$push->send());
+        $response = $push->send();
+
+        $this->assertInstanceOf('stdClass',$response);
 
     }
     /** @test */
@@ -63,7 +65,7 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
         $this->assertInternalType('array',$push->config);
 
         /** APNS */
-        $pushAPN = new PushNotification(new \Edujugon\PushNotification\Apn());
+        $pushAPN = new PushNotification('apn');
 
         $pushAPN->setConfig(['time_to_live' => 3]);
 
@@ -87,7 +89,7 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
 
     /** @test */
     public function send_method_in_apn_service(){
-        $push = new PushNotification(new \Edujugon\PushNotification\Apn());
+        $push = new PushNotification('apn');
 
         $message = [
             'aps' => [
@@ -120,7 +122,7 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
     /** @test */
     public function apn_without_certificate()
     {
-        $push = new PushNotification(new \Edujugon\PushNotification\Apn());
+        $push = new PushNotification('apn');
 
         $push->setConfig(['custom' => 'Custom Value','certificate' => 'MycustomValue']);
         $push->send();
@@ -131,12 +133,29 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
     /** @test */
     public function apn_dry_run_option_update_the_apn_url()
     {
-        $push = new PushNotification(new \Edujugon\PushNotification\Apn());
+        $push = new PushNotification('apn');
 
         $this->assertEquals('ssl://gateway.push.apple.com:2195',$push->url);
         
         $push->setConfig(['dry_run'=>true]);
 
         $this->assertEquals('ssl://gateway.sandbox.push.apple.com:2195',$push->url);
+    }
+
+    /** @test */
+    public function fcm_assert_send_method_returns_an_stdClass_instance()
+    {
+        $push = new PushNotification('fcm');
+
+        $push->setMessage(['message'=>'Hello World'])
+            ->setApiKey('AIzaSyAjsu5h5TLe9_q33zn2Q4a84N9KyCxCB04')
+            ->setDevicesToken(['dHoZVUu4T34:APA91bHJJxHTJMSNp95A3qAcMEbPqiS02UKAiXH0J8M-k7owtPf4XrW9k8QttT9pCLy_QzoxKQsJ4pwaSVEXHhowoPaqCPp1pvVsBZ6QUHoEtO_S9-Esel4N7nqeUypQ6ah8MKZKo6jl'])
+            ->setConfig(['dry_run' => false]);
+
+        $response = $push->send();
+        var_dump($response);
+        $this->assertEquals('https://fcm.googleapis.com/fcm/send',$push->url);
+        $this->assertInstanceOf('stdClass',$response);
+
     }
 }
