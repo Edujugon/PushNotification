@@ -66,7 +66,7 @@ class Gcm extends PushService implements PushServiceInterface
 
     protected function addRequestHeaders(){
         return [
-            'Authorization' => 'key=' . $this->api_key,
+            'Authorization' => 'key=' . $this->apiKey,
             'Content-Type:' =>'application/json'
         ];
     }

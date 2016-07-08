@@ -26,7 +26,7 @@ abstract class PushService
      *
      * @var string
      */
-    protected $api_key = '';
+    protected $apiKey = '';
 
     /**
      * Push Server Response
@@ -43,11 +43,11 @@ abstract class PushService
     }
 
     /**
-     * @param string $api_key
+     * @param string $apiKey
      */
-    public function setApiKey($api_key)
+    public function setApiKey($apiKey)
     {
-        $this->api_key = $api_key;
+        $this->apiKey = $apiKey;
     }
 
     /**

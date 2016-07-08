@@ -2,8 +2,6 @@
 namespace Edujugon\PushNotification;
 
 
-use Edujugon\PushNotification\Contracts\PushServiceInterface;
-
 class PushNotification
 {
 
@@ -18,18 +16,25 @@ class PushNotification
      *
      * @var array
      */
-    protected $service_collection = [
+    protected $servicesList = [
         'gcm' => Gcm::class,
         'apn' => Apn::class,
         'fcm' => Fcm::class
     ];
 
     /**
+     * The default push service to use.
+     *
+     * @var string
+     */
+    private $defaultServiceName = 'gcm';
+
+    /**
      * Devices' Token where send the notification
      *
      * @var array
      */
-    protected $devices_token = [];
+    protected $deviceTokens = [];
 
     /**
      * data to be sent.
@@ -40,12 +45,15 @@ class PushNotification
 
     /**
      * PushNotification constructor.
-     * @param PushServiceInterface $service By default GCM
+     * @param String / a service name of the services list.
      */
     public function __construct($service = null)
     {
-        $this->service = !is_null($service) ? $this->service_collection[$service] : new Fcm;
-        var_dump($this->service);
+        if(!array_key_exists($service,$this->servicesList)) $service = $this->defaultServiceName;
+        
+        $this->service = is_null($service) ? new $this->servicesList[$this->defaultServiceName]
+                                            : new $this->servicesList[$service];
+
     }
     
     /**
@@ -63,12 +71,12 @@ class PushNotification
 
 
     /**
-     * @param array/string $devices_token
+     * @param array/string $deviceTokens
      * @return $this
      */
-    public function setDevicesToken($devices_token)
+    public function setDevicesToken($deviceTokens)
     {
-        $this->devices_token = is_array($devices_token) ? $devices_token : array($devices_token);
+        $this->deviceTokens = is_array($deviceTokens) ? $deviceTokens : array($deviceTokens);
 
         return $this;
     }
@@ -102,7 +110,7 @@ class PushNotification
      */
     public function getUnregisteredDeviceTokens()
     {
-        return $this->service->getUnregisteredDeviceTokens($this->devices_token);
+        return $this->service->getUnregisteredDeviceTokens($this->deviceTokens);
     }
 
     /**
@@ -113,7 +121,7 @@ class PushNotification
      */
     public function send(){
 
-        return $this->service->send($this->devices_token,$this->message);
+        return $this->service->send($this->deviceTokens,$this->message);
 
     }
 

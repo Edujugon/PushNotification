@@ -2,11 +2,16 @@
 
 This is a lightly and easy to use package to send push notification.
 
-## Instalation
+## Installation
 
-Update your composer.json file.
+type in console:
 
-    "edujugon/push-notification": "dev-master"
+        composer require edujugon/push-notification
+
+
+Or update your composer.json file.
+
+    "edujugon/push-notification": "^2.0.*"
 
 Then
 
@@ -38,15 +43,20 @@ Publish the package's configuration file to the application's own config directo
 
 By default it will use GCM as Push Service provider.
 
-If you want to use APNS:
+For APN Service:
 
-    $push = new PushNotification(new \Edujugon\PushNotification\Apn());
+    $push = new PushNotification('apn');
+
+For FCM Service:
+
+    $push = new PushNotification('fcm');
+
 
 ### Push Service configuration
 
 The default configuration for all Push service providers is located in Config/config.php
 
-The default configuration parameters for **GCM** are :
+The default configuration parameters for **GCM** and **FCM** are :
 
 *   priority => normal
 *   dry_run => false
@@ -60,7 +70,7 @@ You can dynamically update those values or adding new ones calling the method se
     ]);
 
 
-The default configuration parameters for **APNS** are:
+The default configuration parameters for **APN** are:
 
 *   certificate => __DIR__ . '/iosCertificates/yourCertificate.pem'
 *   passPhrase => 'MyPassPhrase'
@@ -90,7 +100,7 @@ GCM sample:
                     ->setApiKey('Server-API-Key')
                     ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...]);
 
-APNS sample:
+APN sample:
 
     $push->setMessage([
                 'aps' => [

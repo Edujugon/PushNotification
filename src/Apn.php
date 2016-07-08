@@ -11,21 +11,21 @@ class Apn extends PushService implements PushServiceInterface
      *
      * @var string
      */
-    private $sandbox_url = 'ssl://gateway.sandbox.push.apple.com:2195';
+    private $sandboxUrl = 'ssl://gateway.sandbox.push.apple.com:2195';
 
     /**
      * Url for production
      *
      * @var string
      */
-    private $production_url = 'ssl://gateway.push.apple.com:2195';
+    private $productionUrl = 'ssl://gateway.push.apple.com:2195';
 
     /**
      * Apn constructor.
      */
     public function __construct()
     {
-        $this->url = $this->production_url;
+        $this->url = $this->productionUrl;
 
         $this->config = $this->initializeConfig('apn');
     }
@@ -44,9 +44,9 @@ class Apn extends PushService implements PushServiceInterface
         {
             if($this->config['dry_run']){
 
-                $this->setUrl($this->sandbox_url);
+                $this->setUrl($this->sandboxUrl);
 
-            }else $this->setUrl($this->production_url);
+            }else $this->setUrl($this->productionUrl);
         }
     }
 

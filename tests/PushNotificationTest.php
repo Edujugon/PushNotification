@@ -6,6 +6,14 @@ use Edujugon\PushNotification\PushNotification;
 class PushNotificationTest extends PHPUnit_Framework_TestCase {
 
     /** @test */
+    public function push_notification_instance_creation_without_argument_set_gcm_as_service()
+    {
+        $push = new PushNotification();
+
+        $this->assertInstanceOf('Edujugon\PushNotification\Gcm',$push->service);
+    }
+
+    /** @test */
     public function assert_send_method_returns_an_stdClass_instance()
     {
         $push = new PushNotification();
@@ -148,14 +156,32 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
         $push = new PushNotification('fcm');
 
         $push->setMessage(['message'=>'Hello World'])
-            ->setApiKey('AIzaSyAjsu5h5TLe9_q33zn2Q4a84N9KyCxCB04')
-            ->setDevicesToken(['dHoZVUu4T34:APA91bHJJxHTJMSNp95A3qAcMEbPqiS02UKAiXH0J8M-k7owtPf4XrW9k8QttT9pCLy_QzoxKQsJ4pwaSVEXHhowoPaqCPp1pvVsBZ6QUHoEtO_S9-Esel4N7nqeUypQ6ah8MKZKo6jl'])
+            ->setApiKey('asdfasdffasdfasdfasdf')
+            ->setDevicesToken(['asdfasefaefwefwerwerwer'])
             ->setConfig(['dry_run' => false]);
 
         $response = $push->send();
-        var_dump($response);
+
         $this->assertEquals('https://fcm.googleapis.com/fcm/send',$push->url);
         $this->assertInstanceOf('stdClass',$response);
 
+    }
+
+    /** @test */
+    public function if_push_service_as_argument_is_not_valid_user_gcm_as_default()
+    {
+        $push = new PushNotification('asdf');
+
+        $this->assertInstanceOf('Edujugon\PushNotification\Gcm',$push->service);
+
+
+    }
+    /** @test */
+    public function get_available_push_service_list()
+    {
+        $push = new PushNotification();
+
+        $this->assertCount(3,$push->servicesList);
+        $this->assertInternalType('array',$push->servicesList);
     }
 }
