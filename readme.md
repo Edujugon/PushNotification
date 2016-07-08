@@ -11,7 +11,7 @@ type in console:
 
 Or update your composer.json file.
 
-    "edujugon/push-notification": "^2.0.*"
+    "edujugon/push-notification": "2.0.*"
 
 Then
 
