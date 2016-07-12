@@ -1,5 +1,11 @@
 #   ChangeLog
 
+##  v2.1
+Laravel Facade Usage integrated into the package.
+
+Now if you wanna get the Push Feedback after sending a notification you can chain the method getFeedback after send method.
+
+
 ##  v2.0
 
 Now you can create the object with the push service provider only typing the name

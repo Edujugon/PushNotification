@@ -11,7 +11,7 @@ type in console:
 
 Or update your composer.json file.
 
-    "edujugon/push-notification": "2.0.*"
+    "edujugon/push-notification": "2.1.*"
 
 Then
 
@@ -88,7 +88,7 @@ Even you may update the url of the Push Service dynamically like so:
 
     $puhs->setUrl('http://newPushServiceUrl.com');
 
-> Not update the url unless it's necessary.
+> Not update the url unless it's really necessary.
 
 ### Filling the Notification options
 
@@ -135,20 +135,28 @@ If you want send the notification to only 1 device, you may pass the value as st
 
 ### Send the Notification
 
-Method send() returns Push service Respose as an Object (stdClass).
+Method send() can be also chained to the above methods.
 
-    $push->send();
+    $push->setMessage(['message'=>'This is the message','title'=>'This is the title'])
+                        ->setApiKey('Server-API-Key')
+                        ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...])
+                        ->send();
 
-### Review the Notification Response
+### Retrieve the Notification Response
 
-If you want to retrieve the push service response again, then:
+If you want to retrieve the push service response, you can call the method getFeedback:
 
-    $push->feedback;
+    $push->getFeedback();
 
-or
+Or again, chain it to the above methods:
 
-    $push->service->feedback;
+    $push->setMessage(['message'=>'This is the message','title'=>'This is the title'])
+                        ->setApiKey('Server-API-Key')
+                        ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...])
+                        ->send()
+                        ->getFeedback();
 
+It will return an object with the response.
 
 ### Check if there was any error sending the push notification
 
@@ -162,5 +170,16 @@ After sending a notification, you may retrieve the list of unregistered tokens
 
     $push->getUnregisteredDeviceTokens();
 
-This method returns an array of unregistered tokens from the Push service provider. If there aren't any unregistered tokens, returns an empty array.
+This method returns an array of unregistered tokens from the Push service provider. If there isn't any unregistered token, it will return an empty array.
 
+### Laravel Alias Facade
+
+After register the Alias Facade for this Package, you can use it like follows:
+
+    PushNotification::setMessage(['message'=>'This is the message','title'=>'This is the title'])
+                            ->setApiKey('Server-API-Key')
+                            ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...])
+                            ->send()
+                            ->getFeedback();
+
+It would return the Push Feedback of the Notification sent.
