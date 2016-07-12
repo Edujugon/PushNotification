@@ -189,7 +189,7 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
     public function if_argument_in_set_service_method_does_not_exist_set_the_service_by_default(){
         $push = new PushNotification();
 
-        $push->setService('asdf');
+        $push->setService('asdf')->send();
         $this->assertInstanceOf('Edujugon\PushNotification\Gcm',$push->service);
 
         $push->setService('fcm');

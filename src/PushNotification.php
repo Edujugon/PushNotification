@@ -60,12 +60,15 @@ class PushNotification
      * Set the Push Service to be used.
      * 
      * @param $serviceName
+     * @return $this
      */
     public function setService($serviceName){
 
         if(!array_key_exists($serviceName,$this->servicesList)) $serviceName = $this->defaultServiceName;
         
         $this->service = new $this->servicesList[$serviceName];
+
+        return $this;
     }
 
     /**
