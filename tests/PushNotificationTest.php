@@ -23,9 +23,9 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
                 ->setDevicesToken(['howoPaqCPp1pvVsBZ6QUHoEtO_S9-Esel4N7nqeUypQ6ah8MKZKo6jl'])
                 ->setConfig(['dry_run' => true]);
 
-        $response = $push->send();
+        $push = $push->send();
 
-        $this->assertInstanceOf('stdClass',$response);
+        $this->assertInstanceOf('stdClass',$push->getFeedback());
 
     }
     /** @test */
@@ -120,9 +120,9 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
                 'asdfwef'
             ]);
 
-        $response = $push->send();
+        $push = $push->send();
 
-        $this->assertInstanceOf('stdClass',$response);
+        $this->assertInstanceOf('stdClass',$push->getFeedback());
         $this->assertCount(2,$push->getUnregisteredDeviceTokens());
         $this->assertInternalType('array',$push->getUnregisteredDeviceTokens());
     }
@@ -160,10 +160,10 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
             ->setDevicesToken(['asdfasefaefwefwerwerwer'])
             ->setConfig(['dry_run' => false]);
 
-        $response = $push->send();
+        $push = $push->send();
 
         $this->assertEquals('https://fcm.googleapis.com/fcm/send',$push->url);
-        $this->assertInstanceOf('stdClass',$response);
+        $this->assertInstanceOf('stdClass',$push->getFeedback());
 
     }
 
@@ -183,5 +183,31 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
 
         $this->assertCount(3,$push->servicesList);
         $this->assertInternalType('array',$push->servicesList);
+    }
+
+    /** @test */
+    public function if_argument_in_set_service_method_does_not_exist_set_the_service_by_default(){
+        $push = new PushNotification();
+
+        $push->setService('asdf');
+        $this->assertInstanceOf('Edujugon\PushNotification\Gcm',$push->service);
+
+        $push->setService('fcm');
+        $this->assertInstanceOf('Edujugon\PushNotification\Fcm',$push->service);
+    }
+
+    /** @test */
+    public function get_feedback_after_sending_a_notification()
+    {
+        $push = new PushNotification('fcm');
+
+        $response = $push->setMessage(['message'=>'Hello World'])
+            ->setApiKey('asdfasdffasdfasdfasdf')
+            ->setDevicesToken(['asdfasefaefwefwerwerwer'])
+            ->setConfig(['dry_run' => false])
+            ->send()
+            ->getFeedback();
+
+        $this->assertInstanceOf('stdClass',$response);
     }
 }

@@ -55,7 +55,19 @@ class PushNotification
                                             : new $this->servicesList[$service];
 
     }
-    
+
+    /**
+     * Set the Push Service to be used.
+     * 
+     * @param $serviceName
+     */
+    public function setService($serviceName){
+
+        if(!array_key_exists($serviceName,$this->servicesList)) $serviceName = $this->defaultServiceName;
+        
+        $this->service = new $this->servicesList[$serviceName];
+    }
+
     /**
      * Set the message of the notification.
      *
@@ -114,22 +126,33 @@ class PushNotification
     }
 
     /**
-     * Send Push Notification
+     * Give the Push Notification Feedback after sending a notification.
      * 
-     * @param  \GuzzleHttp\Client client
-     * @return boolean true|false
+     * @return mixed
+     */
+    public function getFeedback()
+    {
+        return $this->service->feedback;
+    }
+
+    /**
+     * Send Push Notification
+     *
+     * @return $this
      */
     public function send(){
 
-        return $this->service->send($this->deviceTokens,$this->message);
+        $this->service->send($this->deviceTokens,$this->message);
+
+        return $this;
 
     }
 
     /**
-     * Return property if exit here or in service property, otherwise null.
+     * Return property if exit here or in service object, otherwise null.
      *
      * @param $property
-     * @return null
+     * @return mixed / null
      */
     public function __get($property){
 
