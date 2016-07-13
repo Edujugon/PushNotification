@@ -1,7 +1,7 @@
 {
     "name": "edujugon/push-notification",
-    "description": "Package to send push notifications to Android and IOS devices",
-    "keywords": ["Laravel","push","notification","high","priority"],
+    "description": "PHP and Laravel 5.* Package to send push notifications to Android and IOS devices",
+    "keywords": ["Laravel","push","notification","gcm","apn","fcm","high","priority"],
     "license": "MIT",
     "authors": [
         {
