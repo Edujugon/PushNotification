@@ -176,7 +176,8 @@ This method returns an array of unregistered tokens from the Push service provid
 
 After register the Alias Facade for this Package, you can use it like follows:
 
-    PushNotification::setMessage(['message'=>'This is the message','title'=>'This is the title'])
+    PushNotification::setService('fcm')
+                            ->setMessage(['message'=>'This is the message','title'=>'This is the title'])
                             ->setApiKey('Server-API-Key')
                             ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...])
                             ->send()
