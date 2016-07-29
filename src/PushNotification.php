@@ -119,7 +119,7 @@ class PushNotification
     }
 
     /**
-     *Provide the unregistered tokens of the notification sent.
+     *Get the unregistered tokens of the notification sent.
      * 
      * @return array $tokenUnRegistered
      */

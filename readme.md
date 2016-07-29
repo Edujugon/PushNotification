@@ -2,6 +2,13 @@
 
 This is a lightly and easy to use package to send push notification.
 
+####Push Service Providers Available:
+
+* GCM
+* FCM
+* APN
+* More sites coming soon.
+
 ## Installation
 
 type in console:
@@ -37,22 +44,9 @@ Publish the package's configuration file to the application's own config directo
 
     php artisan vendor:publish --provider="Edujugon\PushNotification\Providers\PushNotificationServiceProvider" --tag="config"
 
-## Usage
+> Go to [laravel facade sample](https://github.com/edujugon/PushNotification#laravel-alias-facade) directly.
 
-    $push = new PushNotification;
-
-By default it will use GCM as Push Service provider.
-
-For APN Service:
-
-    $push = new PushNotification('apn');
-
-For FCM Service:
-
-    $push = new PushNotification('fcm');
-
-
-### Push Service configuration
+### Configuration
 
 The default configuration for all Push service providers is located in Config/config.php
 
@@ -84,15 +78,104 @@ Also you can update those values and add more dynamically
         'dry_run' => true
     ]);
 
-Even you may update the url of the Push Service dynamically like so:
+Even you may update the url of the Push Service dynamically like follows:
 
     $puhs->setUrl('http://newPushServiceUrl.com');
 
 > Not update the url unless it's really necessary.
 
-### Filling the Notification options
+## Usage
 
-You can chain the methods when load the notification options.
+    $push = new PushNotification;
+
+By default it will use GCM as Push Service provider.
+
+For APN Service:
+
+    $push = new PushNotification('apn');
+
+For FCM Service:
+
+    $push = new PushNotification('fcm');
+    
+Now you may use any method what you need. Please see the API List.
+
+
+## API List
+
+- [setMessage](https://github.com/edujugon/PushNotification/#setMessage)
+- [setApiKey](https://github.com/edujugon/PushNotification/#setApiKey)
+- [setDevicesToken](https://github.com/edujugon/PushNotification/#setDevicesToken)
+- [send](https://github.com/edujugon/PushNotification/#send)
+- [getFeedback](https://github.com/edujugon/PushNotification/#getFeedback)
+- [getUnregisteredDeviceTokens](https://github.com/edujugon/PushNotification/#getUnregisteredDeviceTokens)
+
+> Or go to [Usage samples](https://github.com/edujugon/PushNotification#usage-samples) directly.
+
+#### setMessage
+
+`setMessage` method sets the message parameters, which you pass the name through parameter as array.
+
+**Syntax**
+
+```php
+object setMessage(array $data)
+```
+
+#### setApiKey
+
+`setApiKey` method sets the API Key of your App, which you pass the name through parameter as string.
+
+**Syntax**
+
+```php
+object setApiKey($api_key)
+```
+
+#### setDevicesToken
+
+`setDevicesToken` method sets the devices' tokens, which you pass the name through parameter as array or string if it was only one.
+
+**Syntax**
+
+```php
+object setDevicesToken($deviceTokens)
+```
+
+#### send
+
+`send` method sends the notification.
+
+**Syntax**
+
+```php
+object send()
+```
+
+#### getFeedback
+
+`getFeedback` method gets the notification response, which you may use it chaining it to `send` method or call it whenever after sending a notification.
+
+**Syntax**
+
+```php
+object getFeedback()
+```
+
+#### getUnregisteredDeviceTokens
+
+`getUnregisteredDeviceTokens` method gets the devices' tokens that couldn't receive the notification because they aren't registered to the Push service provider. 
+You may use it chaining it to `send` method or call it whenever after sending a notification.
+
+**Syntax**
+
+```php
+array getUnregisteredDeviceTokens()
+```
+
+### Usage samples
+
+>You can chain the methods.
 
 GCM sample:
 
@@ -142,9 +225,9 @@ Method send() can be also chained to the above methods.
                         ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...])
                         ->send();
 
-### Retrieve the Notification Response
+### Getting the Notification Response
 
-If you want to retrieve the push service response, you can call the method getFeedback:
+If you want to get the push service response, you can call the method `getFeedback`:
 
     $push->getFeedback();
 
