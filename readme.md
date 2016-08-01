@@ -103,14 +103,14 @@ Now you may use any method what you need. Please see the API List.
 
 ## API List
 
-- [setMessage](https://github.com/edujugon/PushNotification/#setmessage)
-- [setApiKey](https://github.com/edujugon/PushNotification/#setapikey)
-- [setDevicesToken](https://github.com/edujugon/PushNotification/#setdevicestoken)
-- [send](https://github.com/edujugon/PushNotification/#send)
-- [getFeedback](https://github.com/edujugon/PushNotification/#getfeedback)
-- [getUnregisteredDeviceTokens](https://github.com/edujugon/PushNotification/#getunregistereddevicetokens)
-- [setConfig](https://github.com/edujugon/PushNotification/#setconfig)
-- [setUrl](https://github.com/edujugon/PushNotification/#seturl)
+- [setMessage](https://github.com/edujugon/PushNotification#setmessage)
+- [setApiKey](https://github.com/edujugon/PushNotification#setapikey)
+- [setDevicesToken](https://github.com/edujugon/PushNotification#setdevicestoken)
+- [send](https://github.com/edujugon/PushNotification#send)
+- [getFeedback](https://github.com/edujugon/PushNotification#getfeedback)
+- [getUnregisteredDeviceTokens](https://github.com/edujugon/PushNotification#getunregistereddevicetokens)
+- [setConfig](https://github.com/edujugon/PushNotification#setconfig)
+- [setUrl](https://github.com/edujugon/PushNotification#seturl)
 
 > Or go to [Usage samples](https://github.com/edujugon/PushNotification#usage-samples) directly.
 
