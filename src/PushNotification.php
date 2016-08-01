@@ -108,6 +108,8 @@ class PushNotification
     }
 
     /**
+     * Set the Push service configuration
+     *
      * @param array $config
      * @return $this
      */
@@ -115,6 +117,18 @@ class PushNotification
     {
         $this->service->setConfig($config);
 
+        return $this;
+    }
+
+    /**
+     * Set the Push service url
+     *
+     * @param string $url
+     * @return $this
+     */
+    public function setUrl($url)
+    {
+        $this->service->setUrl($url);
         return $this;
     }
 

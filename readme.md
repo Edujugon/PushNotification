@@ -7,7 +7,7 @@ This is a lightly and easy to use package to send push notification.
 * GCM
 * FCM
 * APN
-* More sites coming soon.
+* More Push Service Providers coming soon.
 
 ## Installation
 
@@ -109,6 +109,8 @@ Now you may use any method what you need. Please see the API List.
 - [send](https://github.com/edujugon/PushNotification/#send)
 - [getFeedback](https://github.com/edujugon/PushNotification/#getfeedback)
 - [getUnregisteredDeviceTokens](https://github.com/edujugon/PushNotification/#getunregistereddevicetokens)
+- [setConfig](https://github.com/edujugon/PushNotification/#setconfig)
+- [setUrl](https://github.com/edujugon/PushNotification/#seturl)
 
 > Or go to [Usage samples](https://github.com/edujugon/PushNotification#usage-samples) directly.
 
@@ -172,6 +174,27 @@ You may use it chaining it to `send` method or call it whenever after sending a 
 ```php
 array getUnregisteredDeviceTokens()
 ```
+
+#### setConfig
+
+`setConfig` method sets the Push service configuration, which you pass the name through parameter as an array.
+
+**Syntax**
+
+```php
+object setConfig(array $config)
+```
+
+#### setUrl
+
+`setUrl` method sets the Push service url, which you pass the name through parameter as a string.
+
+**Syntax**
+
+```php
+object setUrl($url)
+```
+> Not update the url unless it's really necessary.
 
 ### Usage samples
 
