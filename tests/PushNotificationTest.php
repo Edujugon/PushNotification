@@ -123,7 +123,6 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
         $push = $push->send();
 
         $this->assertInstanceOf('stdClass',$push->getFeedback());
-        $this->assertCount(2,$push->getUnregisteredDeviceTokens());
         $this->assertInternalType('array',$push->getUnregisteredDeviceTokens());
     }
 
