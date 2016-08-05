@@ -96,14 +96,14 @@ class Gcm extends PushService implements PushServiceInterface
 
             $this->setFeedback(json_decode($json));
 
+            return $this->feedback;
+
         }catch (\Exception $e)
         {
             $response = ['success' => false, 'error' => $e->getMessage()];
             
             $this->setFeedback(json_decode(json_encode($response), FALSE));
 
-        }finally
-        {
             return $this->feedback;
         }
 
