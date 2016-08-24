@@ -67,7 +67,7 @@ You can dynamically update those values or adding new ones calling the method se
 The default configuration parameters for **APN** are:
 
 *   certificate => __DIR__ . '/iosCertificates/yourCertificate.pem'
-*   passPhrase => 'MyPassPhrase'
+*   passPhrase => 'MyPassPhrase' or passFile => __DIR__ . '/iosCertificates/yourKey.pem'
 *   dry_run => false
 
 Also you can update those values and add more dynamically

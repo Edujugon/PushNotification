@@ -92,10 +92,12 @@ class Apn extends PushService implements PushServiceInterface
 
         $certificate = $this->config['certificate'];
         $passphrase = $this->config['passPhrase'];
+        $passfile = $this->config['passFile'];
 
         $ctx = stream_context_create();
         stream_context_set_option($ctx, 'ssl', 'local_cert', $certificate);
         stream_context_set_option($ctx, 'ssl', 'passphrase', $passphrase);
+        stream_context_set_option($ctx, 'ssl', 'local_pk', $passfile);
 
         // Open a connection to the APNS server
         $fp = stream_socket_client(
