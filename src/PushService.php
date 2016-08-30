@@ -2,7 +2,13 @@
 
 namespace Edujugon\PushNotification;
 
-
+/**
+ * abstract Class PushService
+ * Serves as superclass for Apn, Gcm and Fcm
+ *
+ * @property mixed feedback
+ * @package Edujugon\PushNotification
+ */
 abstract class PushService
 {
 
@@ -113,4 +119,6 @@ abstract class PushService
         return property_exists($this,$property) ? $this->$property : null;
     }
 
+    abstract public function getUnregisteredDeviceTokens(array $devices_token);
+    abstract public function send(array $deviceTokens,array $message);
 }
