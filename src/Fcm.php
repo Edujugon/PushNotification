@@ -12,6 +12,7 @@ class Fcm extends Gcm
         $this->url = 'https://fcm.googleapis.com/fcm/send';
 
         $this->config = $this->initializeConfig('fcm');
+        $this->apiKey = $this->config['apiKey'];
         
         $this->client = new Client();
     }
