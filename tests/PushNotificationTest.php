@@ -102,26 +102,22 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
         $message = [
             'aps' => [
                 'alert' => [
-                    'title' => 'This is the title',
-                    'body' => 'This is the body'
+                    'title' => 'Final Check',
+                    'body' => 'Just for testing purposes'
                 ],
                 'sound' => 'default'
 
-            ],
-            'data' => [
-                'text' => 'This the text',
-                'client_url' => 'http://bing.com',
             ]
         ];
 
         $push->setMessage($message)
             ->setDevicesToken([
-                '123123aasfasfd',
-                'asdfwef'
+                //'0975fe06523113b73fc13c72775b4f6ed3c364442a091e3bbfe3202ddcc5f54a',
+                '123123123'
             ]);
 
         $push = $push->send();
-
+        var_dump($push->getFeedback());
         $this->assertInstanceOf('stdClass',$push->getFeedback());
         $this->assertInternalType('array',$push->getUnregisteredDeviceTokens());
     }
@@ -142,8 +138,6 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
     {
         $push = new PushNotification('apn');
 
-        $this->assertEquals('ssl://gateway.push.apple.com:2195',$push->url);
-        
         $push->setConfig(['dry_run'=>true]);
 
         $this->assertEquals('ssl://gateway.sandbox.push.apple.com:2195',$push->url);

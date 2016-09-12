@@ -28,6 +28,8 @@ class Apn extends PushService implements PushServiceInterface
         $this->url = $this->productionUrl;
 
         $this->config = $this->initializeConfig('apn');
+
+        $this->setProperGateway();
     }
 
     /**
@@ -35,15 +37,24 @@ class Apn extends PushService implements PushServiceInterface
      * Check if there is dry_run parameter in config data. Set the service url according to the dry_run value.
      *
      * @param array $config
+     * @return mixed|void
      */
     public function setConfig(array $config)
     {
         parent::setConfig($config);
 
+        $this->setProperGateway();
+
+    }
+
+    /**
+     *Set the correct Gateway url based on dry_run param
+     */
+    private function setProperGateway()
+    {
         if(isset($this->config['dry_run']))
         {
             if($this->config['dry_run']){
-
                 $this->setUrl($this->sandboxUrl);
 
             }else $this->setUrl($this->productionUrl);
@@ -95,7 +106,8 @@ class Apn extends PushService implements PushServiceInterface
 
         $ctx = stream_context_create();
         stream_context_set_option($ctx, 'ssl', 'local_cert', $certificate);
-        stream_context_set_option($ctx, 'ssl', 'passphrase', $passphrase);
+
+        if(!empty($passphrase)) stream_context_set_option($ctx, 'ssl', 'passphrase', $passphrase);
 
         // Open a connection to the APNS server
         $fp = stream_socket_client(
