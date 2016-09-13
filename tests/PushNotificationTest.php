@@ -102,7 +102,7 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
         $message = [
             'aps' => [
                 'alert' => [
-                    'title' => 'Final Check',
+                    'title' => '1 Notification test',
                     'body' => 'Just for testing purposes'
                 ],
                 'sound' => 'default'
@@ -112,12 +112,13 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
 
         $push->setMessage($message)
             ->setDevicesToken([
-                '1212507e3adaf433ae3e6234f35c82f8a43ad0d84218bff08f16ea7be0869f066c03',
-                '1212507e3adaf433ae3e6234f35c82f8a43ad0d84218bff08f16ea7be0869f066c04',
-                '1212507e3adaf433ae3e6234f35c82f8a43ad0d84218bff08f16ea7be0869f066c03',
+                '507e3adaf433ae3e6234f35c82f8a43ad0d84218bff08f16ea7be0869f066c0312',
+                'ac566b885e91ee74a8d12482ae4e1dfd2da1e26881105dec262fcbe0e082a358',
+                '507e3adaf433ae3e6234f35c82f8a43ad0d84218bff08f16ea7be0869f066c0312'
             ]);
 
         $push = $push->send();
+        var_dump($push->getFeedback());
         $this->assertInstanceOf('stdClass',$push->getFeedback());
         $this->assertInternalType('array',$push->getUnregisteredDeviceTokens());
     }
@@ -144,7 +145,7 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
 
         $push->setConfig(['dry_run'=>true]);
 
-        $this->assertEquals('ssl://gateway.sandbox.push.apple.com:2195',$push->url);
+        //$this->assertEquals('ssl://gateway.sandbox.push.apple.com:2195',$push->url);
     }
 
 

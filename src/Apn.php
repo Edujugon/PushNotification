@@ -11,7 +11,9 @@ class Apn extends PushService implements PushServiceInterface
      *
      * @var string
      */
-    private $sandboxUrl = 'ssl://gateway.sandbox.push.apple.com:2195';
+    //private $sandboxUrl = 'ssl://gateway.sandbox.push.apple.com:2195';
+
+    private $sandboxUrl = 'ssl://feedback.sandbox.push.apple.com:2196';
 
     /**
      * Url for production
@@ -140,6 +142,8 @@ class Apn extends PushService implements PushServiceInterface
             $this->url, $err,
             $errstr, 60, STREAM_CLIENT_CONNECT|STREAM_CLIENT_PERSISTENT, $ctx);
 
+        stream_set_blocking ($fp, 0);
+
         if (!$fp)
         {
             $response = ['success' => false, 'error' => "Failed to connect: $err $errstr" . PHP_EOL];
@@ -172,6 +176,7 @@ class Apn extends PushService implements PushServiceInterface
 
         foreach ($deviceTokens as $token)
         {
+
             // Build the binary notification
             //Check if the token is numeric no to get PHP Warnings with pack function.
             if (ctype_xdigit($token))  {
@@ -183,17 +188,30 @@ class Apn extends PushService implements PushServiceInterface
                 continue;
             }
 
-
-            // Send the notification to the server
             $result = fwrite($fp, $msg, strlen($msg));
 
-            if (!$result)
+            usleep(500000);
+
+            if(feof($fp))
             {
+                $fp = $this->openConnectionAPNS();
+
                 $feedback['tokenFailList'][] = $token;
                 $feedback['failure'] += 1;
-
             }else
                 $feedback['success'] += 1;
+
+            $this->checkAppleErrorResponse($fp);
+
+            //var_dump($result);
+
+//            if (!$result)
+//            {
+//                $feedback['tokenFailList'][] = $token;
+//                $feedback['failure'] += 1;
+//
+//            }else
+//                $feedback['success'] += 1;
 
         }
 
@@ -204,6 +222,50 @@ class Apn extends PushService implements PushServiceInterface
 
         return $this->feedback;
 
+    }
+
+    //FUNCTION to check if there is an error response from Apple
+//         Returns TRUE if there was and FALSE if there was not
+    private function checkAppleErrorResponse($fp) {
+
+        //byte1=always 8, byte2=StatusCode, bytes3,4,5,6=identifier(rowID). Should return nothing if OK.
+        $apple_error_response = fread($fp, 6);
+        //NOTE: Make sure you set stream_set_blocking($fp, 0) or else fread will pause your script and wait forever when there is no response to be sent.
+
+        if ($apple_error_response) {
+            //unpack the error response (first byte 'command" should always be 8)
+            $error_response = unpack('Ccommand/Cstatus_code/Nidentifier', $apple_error_response);
+
+            if ($error_response['status_code'] == '0') {
+                $error_response['status_code'] = '0-No errors encountered';
+            } else if ($error_response['status_code'] == '1') {
+                $error_response['status_code'] = '1-Processing error';
+            } else if ($error_response['status_code'] == '2') {
+                $error_response['status_code'] = '2-Missing device token';
+            } else if ($error_response['status_code'] == '3') {
+                $error_response['status_code'] = '3-Missing topic';
+            } else if ($error_response['status_code'] == '4') {
+                $error_response['status_code'] = '4-Missing payload';
+            } else if ($error_response['status_code'] == '5') {
+                $error_response['status_code'] = '5-Invalid token size';
+            } else if ($error_response['status_code'] == '6') {
+                $error_response['status_code'] = '6-Invalid topic size';
+            } else if ($error_response['status_code'] == '7') {
+                $error_response['status_code'] = '7-Invalid payload size';
+            } else if ($error_response['status_code'] == '8') {
+                $error_response['status_code'] = '8-Invalid token';
+            } else if ($error_response['status_code'] == '255') {
+                $error_response['status_code'] = '255-None (unknown)';
+            } else {
+                $error_response['status_code'] = $error_response['status_code'] . '-Not listed';
+            }
+
+            var_dump('Response Command: ' . $error_response['command'] . ' Identifier: ' . $error_response['identifier'] . ' Status: ' . $error_response['status_code']);
+
+
+            return true;
+        }
+        return false;
     }
 
 }
