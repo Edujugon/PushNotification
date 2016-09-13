@@ -75,21 +75,37 @@ class Apn extends PushService implements PushServiceInterface
     }
 
     /**
+     * Set the feedback with no exist any certificate.
+     *
+     * @return mixed|void
+     */
+    private function messageNoExistCertificate()
+    {
+        $response = ['success' => false, 'error' => "Please, add your APN certificate to the iosCertificates folder." . PHP_EOL];
+
+        $this->setFeedback(json_decode(json_encode($response), FALSE));
+    }
+
+    /**
      * Check if the certificate file exist.
      * @return bool
      */
     private function existCertificate()
     {
-        $certificate = $this->config['certificate'];
-        if(!file_exists($certificate))
+        if(isset($this->config['certificate']))
         {
-            $response = ['success' => false, 'error' => "Please, add your APN certificate to the iosCertificates folder." . PHP_EOL];
+            $certificate = $this->config['certificate'];
+            if(!file_exists($certificate))
+            {
+                $this->messageNoExistCertificate();
+                return false;
+            }
 
-            $this->setFeedback(json_decode(json_encode($response), FALSE));
-
-            return false;
+            return true;
         }
-        return true;
+
+        $this->messageNoExistCertificate();
+        return false;
     }
     /**
      * Create the connection to APNS server
@@ -101,13 +117,23 @@ class Apn extends PushService implements PushServiceInterface
     private function openConnectionAPNS()
     {
 
-        $certificate = $this->config['certificate'];
-        $passphrase = $this->config['passPhrase'];
-
         $ctx = stream_context_create();
+
+        //Already checked if certificate exists.
+        $certificate = $this->config['certificate'];
         stream_context_set_option($ctx, 'ssl', 'local_cert', $certificate);
 
-        if(!empty($passphrase)) stream_context_set_option($ctx, 'ssl', 'passphrase', $passphrase);
+        if(isset($this->config['passPhrase']))
+        {
+            $passPhrase = $this->config['passPhrase'];
+            if(!empty($passPhrase)) stream_context_set_option($ctx, 'ssl', 'passphrase', $passPhrase);
+        }
+
+        if(isset($this->config['passFile']))
+        {
+            $passFile = $this->config['passFile'];
+            if(file_exists($passFile)) stream_context_set_option($ctx, 'ssl', 'local_pk', $passFile);
+        }
 
         // Open a connection to the APNS server
         $fp = stream_socket_client(
@@ -129,7 +155,7 @@ class Apn extends PushService implements PushServiceInterface
      * Send Push Notification
      * @param  array $deviceTokens
      * @param array $message
-     * @return \stdClass  GCM Response
+     * @return \stdClass  APN Response
      */
     public function send(array $deviceTokens,array $message)
     {
@@ -179,4 +205,5 @@ class Apn extends PushService implements PushServiceInterface
         return $this->feedback;
 
     }
+
 }

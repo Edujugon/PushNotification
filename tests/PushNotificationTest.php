@@ -112,12 +112,12 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
 
         $push->setMessage($message)
             ->setDevicesToken([
-                //'0975fe06523113b73fc13c72775b4f6ed3c364442a091e3bbfe3202ddcc5f54a',
-                '123123123'
+                '1212507e3adaf433ae3e6234f35c82f8a43ad0d84218bff08f16ea7be0869f066c03',
+                '1212507e3adaf433ae3e6234f35c82f8a43ad0d84218bff08f16ea7be0869f066c04',
+                '1212507e3adaf433ae3e6234f35c82f8a43ad0d84218bff08f16ea7be0869f066c03',
             ]);
 
         $push = $push->send();
-        var_dump($push->getFeedback());
         $this->assertInstanceOf('stdClass',$push->getFeedback());
         $this->assertInternalType('array',$push->getUnregisteredDeviceTokens());
     }
@@ -138,10 +138,15 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
     {
         $push = new PushNotification('apn');
 
+        $push->setConfig(['dry_run'=>false]);
+
+        $this->assertEquals('ssl://gateway.push.apple.com:2195',$push->url);
+
         $push->setConfig(['dry_run'=>true]);
 
         $this->assertEquals('ssl://gateway.sandbox.push.apple.com:2195',$push->url);
     }
+
 
     /** @test */
     public function fcm_assert_send_method_returns_an_stdClass_instance()
