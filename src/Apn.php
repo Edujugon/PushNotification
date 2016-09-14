@@ -11,9 +11,7 @@ class Apn extends PushService implements PushServiceInterface
      *
      * @var string
      */
-    //private $sandboxUrl = 'ssl://gateway.sandbox.push.apple.com:2195';
-
-    private $sandboxUrl = 'ssl://feedback.sandbox.push.apple.com:2196';
+    private $sandboxUrl = 'ssl://gateway.sandbox.push.apple.com:2195';
 
     /**
      * Url for production
@@ -21,6 +19,25 @@ class Apn extends PushService implements PushServiceInterface
      * @var string
      */
     private $productionUrl = 'ssl://gateway.push.apple.com:2195';
+
+    /**
+     * Feedback SandBox url
+     * @var string
+     */
+    private $feedbackSandboxUrl = 'ssl://feedback.sandbox.push.apple.com:2196';
+
+    /**
+     * Feedback Production url
+     * @var string
+     */
+    private $feedbackProductionUrl = 'ssl://feedback.push.apple.com:2196';
+
+    /**
+     *  It's automatically filled based on the dry_run parameter.
+     *
+     * @var string
+     */
+    private $feedbackUrl;
 
     /**
      * Apn constructor.
@@ -39,7 +56,7 @@ class Apn extends PushService implements PushServiceInterface
      * Check if there is dry_run parameter in config data. Set the service url according to the dry_run value.
      *
      * @param array $config
-     * @return mixed|void
+     * @return void
      */
     public function setConfig(array $config)
     {
@@ -50,7 +67,9 @@ class Apn extends PushService implements PushServiceInterface
     }
 
     /**
-     *Set the correct Gateway url based on dry_run param
+     *Set the correct Gateway url and the Feedback url based on dry_run param.
+     *
+     * @return void
      */
     private function setProperGateway()
     {
@@ -58,8 +77,12 @@ class Apn extends PushService implements PushServiceInterface
         {
             if($this->config['dry_run']){
                 $this->setUrl($this->sandboxUrl);
+                $this->feedback = $this->feedbackSandboxUrl;
 
-            }else $this->setUrl($this->productionUrl);
+            }else {
+                $this->setUrl($this->productionUrl);
+                $this->feedback = $this->feedbackProductionUrl;
+            }
         }
     }
 
@@ -190,28 +213,13 @@ class Apn extends PushService implements PushServiceInterface
 
             $result = fwrite($fp, $msg, strlen($msg));
 
-            usleep(500000);
-
-            if(feof($fp))
+            if (!$result)
             {
-                $fp = $this->openConnectionAPNS();
-
                 $feedback['tokenFailList'][] = $token;
                 $feedback['failure'] += 1;
+
             }else
                 $feedback['success'] += 1;
-
-            $this->checkAppleErrorResponse($fp);
-
-            //var_dump($result);
-
-//            if (!$result)
-//            {
-//                $feedback['tokenFailList'][] = $token;
-//                $feedback['failure'] += 1;
-//
-//            }else
-//                $feedback['success'] += 1;
 
         }
 
@@ -220,52 +228,44 @@ class Apn extends PushService implements PushServiceInterface
         // Close the connection to the server
         fclose($fp);
 
+        //var_dump($this->send_feedback_request($this->config['certificate'],$this->feedbackSandboxUrl));
+
         return $this->feedback;
 
     }
 
-    //FUNCTION to check if there is an error response from Apple
-//         Returns TRUE if there was and FALSE if there was not
-    private function checkAppleErrorResponse($fp) {
-
-        //byte1=always 8, byte2=StatusCode, bytes3,4,5,6=identifier(rowID). Should return nothing if OK.
-        $apple_error_response = fread($fp, 6);
-        //NOTE: Make sure you set stream_set_blocking($fp, 0) or else fread will pause your script and wait forever when there is no response to be sent.
-
-        if ($apple_error_response) {
-            //unpack the error response (first byte 'command" should always be 8)
-            $error_response = unpack('Ccommand/Cstatus_code/Nidentifier', $apple_error_response);
-
-            if ($error_response['status_code'] == '0') {
-                $error_response['status_code'] = '0-No errors encountered';
-            } else if ($error_response['status_code'] == '1') {
-                $error_response['status_code'] = '1-Processing error';
-            } else if ($error_response['status_code'] == '2') {
-                $error_response['status_code'] = '2-Missing device token';
-            } else if ($error_response['status_code'] == '3') {
-                $error_response['status_code'] = '3-Missing topic';
-            } else if ($error_response['status_code'] == '4') {
-                $error_response['status_code'] = '4-Missing payload';
-            } else if ($error_response['status_code'] == '5') {
-                $error_response['status_code'] = '5-Invalid token size';
-            } else if ($error_response['status_code'] == '6') {
-                $error_response['status_code'] = '6-Invalid topic size';
-            } else if ($error_response['status_code'] == '7') {
-                $error_response['status_code'] = '7-Invalid payload size';
-            } else if ($error_response['status_code'] == '8') {
-                $error_response['status_code'] = '8-Invalid token';
-            } else if ($error_response['status_code'] == '255') {
-                $error_response['status_code'] = '255-None (unknown)';
-            } else {
-                $error_response['status_code'] = $error_response['status_code'] . '-Not listed';
-            }
-
-            var_dump('Response Command: ' . $error_response['command'] . ' Identifier: ' . $error_response['identifier'] . ' Status: ' . $error_response['status_code']);
+    /**
+     * Get the unregistered device tokens from the apns list.
+     * Connect to apn server in order to collect the tokens of the apps which were removed from the device.
+     *
+     * @return object
+     */
+    public function apnsFeedback() {
 
 
-            return true;
+        if(!$this->existCertificate()) return $this->feedback;
+        $certificate = $this->config['certificate'];
+
+        //connect to the APNS feedback servers
+        $stream_context = stream_context_create();
+        stream_context_set_option($stream_context, 'ssl', 'local_cert', $certificate);
+        $apns = stream_socket_client($this->feedbackUrl, $errcode, $errstr, 60, STREAM_CLIENT_CONNECT, $stream_context);
+        if(!$apns) {
+            echo "ERROR $errcode: $errstr\n";
+            return;
         }
-        return false;
+
+
+        $feedback_tokens = array();
+        //and read the data on the connection:
+        while(!feof($apns)) {
+            $data = fread($apns, 38);
+            if(strlen($data)) {
+                $feedback_tokens[] = unpack("N1timestamp/n1length/H*devtoken", $data);
+            }
+        }
+        fclose($apns);
+        return $feedback_tokens;
     }
 
 }

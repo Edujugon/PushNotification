@@ -145,7 +145,7 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
 
         $push->setConfig(['dry_run'=>true]);
 
-        //$this->assertEquals('ssl://gateway.sandbox.push.apple.com:2195',$push->url);
+        $this->assertEquals('ssl://gateway.sandbox.push.apple.com:2195',$push->url);
     }
 
 
@@ -208,5 +208,32 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
             ->getFeedback();
 
         $this->assertInstanceOf('stdClass',$response);
+    }
+
+    /** @test */
+    public function apn_feedback()
+    {
+        $push = new PushNotification('apn');
+        //$push->setUrl('ssl://feedback.sandbox.push.apple.com:2196');
+
+        $message = [
+            'aps' => [
+                'alert' => [
+                    'title' => 'New Notification test',
+                    'body' => 'Just for testing purposes'
+                ],
+                'sound' => 'default'
+
+            ]
+        ];
+
+        $push->setMessage($message)
+            ->setDevicesToken([
+                '2112ac566b885e91ee74a8d12482ae4e1dfd2da1e26881105dec262fcbe0e082a35812',
+                'ac566b885e91ee74a8d12482ae4e1dfd2da1e26881105dec262fcbe0e082a358'
+            ]);
+
+        $push = $push->send();
+        var_dump($push->getFeedback());
     }
 }
