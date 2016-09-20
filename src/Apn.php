@@ -186,9 +186,16 @@ class Apn extends PushService implements PushServiceInterface
      */
     public function send(array $deviceTokens,array $message)
     {
-        
+
+        /**
+         * If there isn't certificate returns the feedback.
+         * Feedback has been loaded in existCertificate method if no certifiate found
+         */
         if(!$this->existCertificate()) return $this->feedback;
 
+        /**
+         * Open APN connection
+         */
         $fp = $this->openConnectionAPNS();
         if(!$fp) return $this->feedback;
 
@@ -238,26 +245,23 @@ class Apn extends PushService implements PushServiceInterface
      * Get the unregistered device tokens from the apns list.
      * Connect to apn server in order to collect the tokens of the apps which were removed from the device.
      *
-     * @return object
+     * @return array
      */
     public function apnsFeedback() {
 
+        $feedback_tokens = array();
 
-        if(!$this->existCertificate()) return $this->feedback;
+        if(!$this->existCertificate()) return $feedback_tokens;
+
         $certificate = $this->config['certificate'];
 
         //connect to the APNS feedback servers
         $stream_context = stream_context_create();
         stream_context_set_option($stream_context, 'ssl', 'local_cert', $certificate);
         $apns = stream_socket_client($this->feedbackUrl, $errcode, $errstr, 60, STREAM_CLIENT_CONNECT, $stream_context);
-        if(!$apns) {
-            echo "ERROR $errcode: $errstr\n";
-            return;
-        }
 
 
-        $feedback_tokens = array();
-        //and read the data on the connection:
+        //Read the data on the connection:
         while(!feof($apns)) {
             $data = fread($apns, 38);
             if(strlen($data)) {
@@ -265,6 +269,7 @@ class Apn extends PushService implements PushServiceInterface
             }
         }
         fclose($apns);
+
         return $feedback_tokens;
     }
 
