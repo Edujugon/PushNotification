@@ -1,4 +1,5 @@
 vendor/
 composer.lock
 .idea
-src/Config/iosCertificates/ck.pem
+src/Config/iosCertificates/
+.DS_Store
