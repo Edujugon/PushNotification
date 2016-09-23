@@ -102,7 +102,7 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
         $message = [
             'aps' => [
                 'alert' => [
-                    'title' => 'Final Check',
+                    'title' => '1 Notification test',
                     'body' => 'Just for testing purposes'
                 ],
                 'sound' => 'default'
@@ -112,12 +112,13 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
 
         $push->setMessage($message)
             ->setDevicesToken([
-                '1212507e3adaf433ae3e6234f35c82f8a43ad0d84218bff08f16ea7be0869f066c03',
-                '1212507e3adaf433ae3e6234f35c82f8a43ad0d84218bff08f16ea7be0869f066c04',
-                '1212507e3adaf433ae3e6234f35c82f8a43ad0d84218bff08f16ea7be0869f066c03',
+                '507e3adaf433ae3e6234f35c82f8a43ad0d84218bff08f16ea7be0869f066c0312',
+                'ac566b885e91ee74a8d12482ae4e1dfd2da1e26881105dec262fcbe0e082a358',
+                '507e3adaf433ae3e6234f35c82f8a43ad0d84218bff08f16ea7be0869f066c0312'
             ]);
 
         $push = $push->send();
+        //var_dump($push->getFeedback());
         $this->assertInstanceOf('stdClass',$push->getFeedback());
         $this->assertInternalType('array',$push->getUnregisteredDeviceTokens());
     }
@@ -207,5 +208,71 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
             ->getFeedback();
 
         $this->assertInstanceOf('stdClass',$response);
+    }
+
+    /** @test */
+    public function apn_feedback()
+    {
+
+        $push = new PushNotification('apn');
+
+        $message = [
+            'aps' => [
+                'alert' => [
+                    'title' => 'New Notification test',
+                    'body' => 'Just for testing purposes'
+                ],
+                'sound' => 'default'
+
+            ]
+        ];
+
+        $push->setMessage($message)
+            ->setDevicesToken([
+                '97b2abc1d9be74347e50425b8b5147cfd815e1659870bee26762d7e944dcc8fb'
+            ]);
+
+        $push->send();
+        $this->assertInstanceOf('stdClass',$push->getFeedback());
+        $this->assertInternalType('array',$push->getUnregisteredDeviceTokens());
+
+    }
+
+
+    /** @test */
+    public function fake_unregisteredDevicesToken_with_apn_feedback_response_merged_to_our_custom_feedback()
+    {
+
+        $primary = [
+            'success' => 3,
+            'failure' => 1,
+            'tokenFailList' => ['asdf']
+        ];
+        $array =[
+            'apnsFeedback' => [
+                [
+                'timestamp' => 121212,
+                'length' => 23,
+                'devtoken' => '2121221212'
+                ],
+                [
+                    'timestamp' => 5454545,
+                    'length' => 32,
+                    'devtoken' => '34343434'
+
+                ]
+            ]
+        ];
+        $merge = array_merge($primary,$array);
+        $obj = json_decode(json_encode($merge), FALSE);
+
+        $tokens = [];
+
+        if(! empty($obj->tokenFailList))
+            $tokens =  $obj->tokenFailList;
+        if(!empty($obj->apnsFeedback))
+            $tokens = array_merge($tokens,array_pluck($obj->apnsFeedback,'devtoken'));
+
+        //var_dump($tokens);
     }
 }

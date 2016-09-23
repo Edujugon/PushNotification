@@ -7,14 +7,14 @@ class PushNotification
 
     /**
      * Push Service Provider
-     * @var
+     * @var PushService
      */
     protected $service;
 
     /**
      * List of the available Push service providers
      *
-     * @var array
+     * @var PushService[]
      */
     protected $servicesList = [
         'gcm' => Gcm::class,

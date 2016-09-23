@@ -21,6 +21,25 @@ class Apn extends PushService implements PushServiceInterface
     private $productionUrl = 'ssl://gateway.push.apple.com:2195';
 
     /**
+     * Feedback SandBox url
+     * @var string
+     */
+    private $feedbackSandboxUrl = 'ssl://feedback.sandbox.push.apple.com:2196';
+
+    /**
+     * Feedback Production url
+     * @var string
+     */
+    private $feedbackProductionUrl = 'ssl://feedback.push.apple.com:2196';
+
+    /**
+     *  It's dynamically filled based on the dry_run parameter.
+     *
+     * @var string
+     */
+    private $feedbackUrl;
+
+    /**
      * Apn constructor.
      */
     public function __construct()
@@ -37,7 +56,7 @@ class Apn extends PushService implements PushServiceInterface
      * Check if there is dry_run parameter in config data. Set the service url according to the dry_run value.
      *
      * @param array $config
-     * @return mixed|void
+     * @return void
      */
     public function setConfig(array $config)
     {
@@ -48,7 +67,9 @@ class Apn extends PushService implements PushServiceInterface
     }
 
     /**
-     *Set the correct Gateway url based on dry_run param
+     *Set the correct Gateway url and the Feedback url based on dry_run param.
+     *
+     * @return void
      */
     private function setProperGateway()
     {
@@ -56,8 +77,12 @@ class Apn extends PushService implements PushServiceInterface
         {
             if($this->config['dry_run']){
                 $this->setUrl($this->sandboxUrl);
+                $this->feedbackUrl = $this->feedbackSandboxUrl;
 
-            }else $this->setUrl($this->productionUrl);
+            }else {
+                $this->setUrl($this->productionUrl);
+                $this->feedbackUrl = $this->feedbackProductionUrl;
+            }
         }
     }
 
@@ -69,9 +94,14 @@ class Apn extends PushService implements PushServiceInterface
      */
     public function getUnregisteredDeviceTokens(array $devices_token)
     {
+        $tokens = [];
+
         if(! empty($this->feedback->tokenFailList))
-            return $this->feedback->tokenFailList;
-        else return [];
+            $tokens =  $this->feedback->tokenFailList;
+        if(!empty($this->feedback->apnsFeedback))
+            $tokens = array_merge($tokens,array_pluck($this->feedback->apnsFeedback,'devtoken'));
+
+        return $tokens;
     }
 
     /**
@@ -140,6 +170,8 @@ class Apn extends PushService implements PushServiceInterface
             $this->url, $err,
             $errstr, 60, STREAM_CLIENT_CONNECT|STREAM_CLIENT_PERSISTENT, $ctx);
 
+        stream_set_blocking ($fp, 0);
+
         if (!$fp)
         {
             $response = ['success' => false, 'error' => "Failed to connect: $err $errstr" . PHP_EOL];
@@ -159,19 +191,28 @@ class Apn extends PushService implements PushServiceInterface
      */
     public function send(array $deviceTokens,array $message)
     {
-        
-        if(!$this->existCertificate()) return $this->feedback;
 
-        $fp = $this->openConnectionAPNS();
-        if(!$fp) return $this->feedback;
+        /**
+         * If there isn't certificate returns the feedback.
+         * Feedback has been loaded in existCertificate method if no certifiate found
+         */
+        if(!$this->existCertificate()) return $this->feedback;
 
         // Encode the payload as JSON
         $payload = json_encode($message);
 
+        //When sending a notification we prepare a clean feedback
         $feedback = $this->initializeFeedback();
 
         foreach ($deviceTokens as $token)
         {
+            /**
+             * Open APN connection
+             */
+            $fp = $this->openConnectionAPNS();
+            if(!$fp) return $this->feedback;
+
+
             // Build the binary notification
             //Check if the token is numeric no to get PHP Warnings with pack function.
             if (ctype_xdigit($token))  {
@@ -183,8 +224,6 @@ class Apn extends PushService implements PushServiceInterface
                 continue;
             }
 
-
-            // Send the notification to the server
             $result = fwrite($fp, $msg, strlen($msg));
 
             if (!$result)
@@ -195,15 +234,91 @@ class Apn extends PushService implements PushServiceInterface
             }else
                 $feedback['success'] += 1;
 
+            // Close the connection to the server
+            if ($fp) {
+                fclose($fp);
+            }
+
         }
 
-        $this->setFeedback(json_decode(json_encode($feedback), FALSE));
+        /**
+         * Retrieving the apn feedback
+         */
+        $apnsFeedback = $this->apnsFeedback();
 
-        // Close the connection to the server
-        fclose($fp);
+        /**
+         * Merge the apn feedback to our custom feedback if there is any.
+         */
+        if(!empty($apnsFeedback))
+        {
+            $feedback = array_merge($feedback,$apnsFeedback);
+
+            $feedback = $this->updateCustomFeedbackValues($apnsFeedback, $feedback,$deviceTokens);
+        }
+
+        //Set the global feedback
+        $this->setFeedback(json_decode(json_encode($feedback), FALSE));
 
         return $this->feedback;
 
+    }
+
+    /**
+     * Get the unregistered device tokens from the apns feedback.
+     * Connect to apn server in order to collect the tokens of the apps which were removed from the device.
+     *
+     * @return array
+     */
+    public function apnsFeedback() {
+
+        $feedback_tokens = array();
+
+        if(!$this->existCertificate()) return $feedback_tokens;
+
+        $certificate = $this->config['certificate'];
+
+        //connect to the APNS feedback servers
+        $stream_context = stream_context_create();
+        stream_context_set_option($stream_context, 'ssl', 'local_cert', $certificate);
+        $apns = stream_socket_client($this->feedbackUrl, $errcode, $errstr, 60, STREAM_CLIENT_CONNECT, $stream_context);
+
+        //Read the data on the connection:
+        while(!feof($apns)) {
+            $data = fread($apns, 38);
+            if(strlen($data)) {
+                $feedback_tokens['apnsFeedback'][] = unpack("N1timestamp/n1length/H*devtoken", $data);
+            }
+        }
+        fclose($apns);
+
+        return $feedback_tokens;
+
+    }
+
+    /**
+     * Update the success and failure values based on apple feedback
+     *
+     * @param $apnsFeedback
+     * @param $feedback
+     * @param $deviceTokens
+     *
+     * @return array $feedback
+     */
+    private function updateCustomFeedbackValues($apnsFeedback, $feedback,$deviceTokens)
+    {
+
+        //Add failures amount based on apple feedback to our custom feedback
+        $feedback['failure'] += count($apnsFeedback['apnsFeedback']);
+
+        //apns tokens
+        $apnsTokens = array_pluck($apnsFeedback['apnsFeedback'],'devtoken');
+
+        foreach ($deviceTokens as $token)
+        {
+            if(in_array($token, $apnsTokens)) $feedback['success'] -= 1;
+        }
+
+        return $feedback;
     }
 
 }
