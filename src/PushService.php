@@ -7,7 +7,7 @@ abstract class PushService
 {
 
     /**
-     * Server Url for push hosting service
+     * Server Url for push notification server
      *
      * @var string
      */
@@ -22,13 +22,6 @@ abstract class PushService
     protected $config = [];
 
     /**
-     * Server API Key to interact with Push server
-     *
-     * @var string
-     */
-    protected $apiKey = '';
-
-    /**
      * Push Server Response
      * @var object
      */
@@ -40,14 +33,6 @@ abstract class PushService
     public function setUrl($url)
     {
         $this->url = $url;
-    }
-
-    /**
-     * @param string $apiKey
-     */
-    public function setApiKey($apiKey)
-    {
-        $this->apiKey = $apiKey;
     }
 
     /**
@@ -107,7 +92,7 @@ abstract class PushService
      * Return property if exit otherwise null.
      *
      * @param $property
-     * @return null
+     * @return mixed|null
      */
     public function __get($property){
         return property_exists($this,$property) ? $this->$property : null;

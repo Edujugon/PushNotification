@@ -54,6 +54,7 @@ The default configuration parameters for **GCM** and **FCM** are :
 
 *   priority => normal
 *   dry_run => false
+*   apiKey => Your ApiKey
 
 You can dynamically update those values or adding new ones calling the method setConfig like so:
 
@@ -105,7 +106,6 @@ Now you may use any method what you need. Please see the API List.
 ## API List
 
 - [setMessage](https://github.com/edujugon/PushNotification#setmessage)
-- [setApiKey](https://github.com/edujugon/PushNotification#setapikey)
 - [setDevicesToken](https://github.com/edujugon/PushNotification#setdevicestoken)
 - [send](https://github.com/edujugon/PushNotification#send)
 - [getFeedback](https://github.com/edujugon/PushNotification#getfeedback)
@@ -113,7 +113,11 @@ Now you may use any method what you need. Please see the API List.
 - [setConfig](https://github.com/edujugon/PushNotification#setconfig)
 - [setUrl](https://github.com/edujugon/PushNotification#seturl)
 
-> Or go to [Usage samples](https://github.com/edujugon/PushNotification#usage-samples) directly.
+### Only for Gcm and Fcm
+
+- [setApiKey](https://github.com/edujugon/PushNotification#setapikey)
+
+> Go to [Usage samples](https://github.com/edujugon/PushNotification#usage-samples) directly.
 
 #### setMessage
 
@@ -125,7 +129,7 @@ Now you may use any method what you need. Please see the API List.
 object setMessage(array $data)
 ```
 
-#### setApiKey
+#### setApiKey (Only for gcm and fcm)
 
 `setApiKey` method sets the API Key of your App, which you pass the name through parameter as string.
 

@@ -215,7 +215,6 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
     {
 
         $push = new PushNotification('apn');
-
         $message = [
             'aps' => [
                 'alert' => [
@@ -229,7 +228,7 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
 
         $push->setMessage($message)
             ->setDevicesToken([
-                '97b2abc1d9be74347e50425b8b5147cfd815e1659870bee26762d7e944dcc8fb'
+                'asdfasdf'
             ]);
 
         $push->send();
@@ -238,6 +237,21 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
 
     }
 
+
+    /** @test */
+    public function allow_apikey_from_config_file()
+    {
+        $push = new PushNotification();
+
+        $response = $push->setMessage(['message'=>'Hello World'])
+            ->setDevicesToken(['asdfasefaefwefwerwerwer'])
+            ->setConfig(['dry_run' => true])
+            ->send()
+            ->getFeedback();
+
+        $this->assertInstanceOf('stdClass',$response);
+
+    }
 
     /** @test */
     public function fake_unregisteredDevicesToken_with_apn_feedback_response_merged_to_our_custom_feedback()

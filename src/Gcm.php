@@ -6,7 +6,23 @@ use GuzzleHttp\Client;
 
 class Gcm extends PushService implements PushServiceInterface
 {
-    
+
+    /**
+     * Set the apiKey for the notification
+     * @param string $apiKey
+     */
+    public function setApiKey($apiKey)
+    {
+        $this->config['apiKey'] = $apiKey;
+    }
+
+    /**
+     * Client to do the request
+     *
+     * @var \GuzzleHttp\Client $client
+     */
+    protected $client;
+
     /**
      * Gcm constructor.
      */
@@ -17,14 +33,6 @@ class Gcm extends PushService implements PushServiceInterface
         $this->config = $this->initializeConfig('gcm');
         $this->client = new Client;
     }
-
-
-    /**
-     * Client to do the request
-     *
-     * @var \GuzzleHttp\Client $client
-     */
-    protected $client;
 
     /**
      * Provide the unregistered tokens of the notification sent.
@@ -57,16 +65,49 @@ class Gcm extends PushService implements PushServiceInterface
         return [];
     }
 
-    protected function addRequestFields($deviceTokens,$message){
-        return array_merge($this->config,[
+    /**
+     * Set the needed fields for the push notification
+     *
+     * @param $deviceTokens
+     * @param $message
+     * @return array
+     */
+    protected function addRequestFields($deviceTokens, $message){
+
+        $params = $this->cleanConfigParams();
+
+        return array_merge($params,[
             'registration_ids'  => $deviceTokens,
             'data'     => $message
         ]);
+
     }
 
+    /**
+     * Clean the config params from unnecessary params no to make the notification too heavy.
+     *
+     * @return array
+     */
+    private function cleanConfigParams(){
+
+        /**
+         * Add the params you want to be removed from the push notification
+         */
+        $paramsToBeRemoved = ['apiKey'];
+
+        return array_filter($this->config,function($key) use($paramsToBeRemoved){
+            return !in_array($key,$paramsToBeRemoved);
+        },ARRAY_FILTER_USE_KEY);
+    }
+
+    /**
+     * Set the needed headers for the push notification.
+     *
+     * @return array
+     */
     protected function addRequestHeaders(){
         return [
-            'Authorization' => 'key=' . $this->apiKey,
+            'Authorization' => 'key=' . $this->config['apiKey'],
             'Content-Type:' =>'application/json'
         ];
     }

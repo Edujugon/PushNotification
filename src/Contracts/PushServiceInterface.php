@@ -15,14 +15,6 @@ interface PushServiceInterface
     function setUrl($url);
 
     /**
-     * Set the API KEY to connect with the Push service provider.
-     *
-     * @param $api_key
-     * @return mixed
-     */
-    function setApiKey($api_key);
-
-    /**
      * Set the Push service provider configuration.
      *
      * @param array $config

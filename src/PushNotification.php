@@ -102,6 +102,9 @@ class PushNotification
      */
     public function setApiKey($api_key)
     {
+        // if apn doesn't do anything
+        if($this->service instanceof Apn) return $this;
+
         $this->service->setApiKey($api_key) ;
 
         return $this;
