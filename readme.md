@@ -129,7 +129,9 @@ Now you may use any method what you need. Please see the API List.
 object setMessage(array $data)
 ```
 
-#### setApiKey (Only for gcm and fcm)
+#### setApiKey
+
+> Only for gcm and fcm
 
 `setApiKey` method sets the API Key of your App, which you pass the name through parameter as string.
 
