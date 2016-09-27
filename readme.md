@@ -105,6 +105,7 @@ Now you may use any method what you need. Please see the API List.
 
 ## API List
 
+- [setService](https://github.com/edujugon/PushNotification#setservice)
 - [setMessage](https://github.com/edujugon/PushNotification#setmessage)
 - [setDevicesToken](https://github.com/edujugon/PushNotification#setdevicestoken)
 - [send](https://github.com/edujugon/PushNotification#send)
@@ -118,6 +119,16 @@ Now you may use any method what you need. Please see the API List.
 - [setApiKey](https://github.com/edujugon/PushNotification#setapikey)
 
 > Go to [Usage samples](https://github.com/edujugon/PushNotification#usage-samples) directly.
+
+#### setService
+
+`setService` method sets the push service to be used, which you pass the name through parameter as string.
+
+**Syntax**
+
+```php
+object setService($name)
+```
 
 #### setMessage
 
