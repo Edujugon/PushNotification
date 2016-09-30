@@ -295,7 +295,7 @@ Method send() can be also chained to the above methods.
         ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...])
         ->send();
 
-### Understanding the Gcm and Fcm Message Payload
+### Understanding Gcm and Fcm Message Payload
 
 #### Notification Message 
 
