@@ -234,13 +234,8 @@ GCM sample:
             ])
             ->setApiKey('Server-API-Key')
             ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...]);
-``
-
-```php
-    $push->setMessage(['message'=>'This is the message','title'=>'This is the title'])
-                    ->setApiKey('Server-API-Key')
-                    ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...]);
 ```
+
 APN sample:
 
     $push->setMessage([
