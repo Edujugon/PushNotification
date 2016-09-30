@@ -76,11 +76,23 @@ class Gcm extends PushService implements PushServiceInterface
 
         $params = $this->cleanConfigParams();
 
-        return array_merge($params,[
-            'registration_ids'  => $deviceTokens,
-            'data'     => $message
-        ]);
+        $message = $this->buildMessage($message);
 
+        return array_merge($params,$message,['registration_ids'  => $deviceTokens]);
+
+    }
+
+    /**
+     * @param $message
+     * @return array
+     */
+    private function buildMessage($message)
+    {
+        // if NO notification and data keys, then set Data Message as default.
+        if(!array_key_exists('data',$message) && !array_key_exists('notification',$message))
+            return ['data' => $message];
+
+        return $message;
     }
 
     /**

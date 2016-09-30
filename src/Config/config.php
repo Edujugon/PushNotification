@@ -9,11 +9,11 @@ return [
   'fcm' => [
         'priority' => 'normal',
         'dry_run' => false,
-        'apiKey' => 'My_ApiKey-Ly4tM',
+        'apiKey' => 'My_ApiKey',
   ],
   'apn' => [
       'certificate' => __DIR__ . '/iosCertificates/apns-dev-cert.pem',
-      'passPhrase' => '', //Optional
+      'passPhrase' => '1234', //Optional
       'passFile' => __DIR__ . '/iosCertificates/yourKey.pem', //Optional
       'dry_run' => true
   ]

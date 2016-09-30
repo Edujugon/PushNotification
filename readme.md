@@ -132,7 +132,7 @@ object setService($name)
 
 #### setMessage
 
-`setMessage` method sets the message parameters, which you pass the name through parameter as array.
+`setMessage` method sets the message parameters, which you pass the values through parameter as array.
 
 **Syntax**
 
@@ -144,7 +144,7 @@ object setMessage(array $data)
 
 > Only for gcm and fcm
 
-`setApiKey` method sets the API Key of your App, which you pass the name through parameter as string.
+`setApiKey` method sets the API Key of your App, which you pass the key through parameter as string.
 
 **Syntax**
 
@@ -154,7 +154,7 @@ object setApiKey($api_key)
 
 #### setDevicesToken
 
-`setDevicesToken` method sets the devices' tokens, which you pass the name through parameter as array or string if it was only one.
+`setDevicesToken` method sets the devices' tokens, which you pass the token through parameter as array or string if it was only one.
 
 **Syntax**
 
@@ -220,10 +220,27 @@ object setUrl($url)
 
 GCM sample:
 
+```php
+    $push->setMessage([
+            'notification' => [
+                    'title'=>'This is the title',
+                    'body'=>'This is the message',
+                    'sound' => 'default'
+                    ],
+            'data' => [
+                    'extraPayLoad1' => 'value1',
+                    'extraPayLoad2' => 'value2'
+                    ]
+            ])
+            ->setApiKey('Server-API-Key')
+            ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...]);
+``
+
+```php
     $push->setMessage(['message'=>'This is the message','title'=>'This is the title'])
                     ->setApiKey('Server-API-Key')
                     ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...]);
-
+```
 APN sample:
 
     $push->setMessage([
@@ -244,9 +261,16 @@ APN sample:
 or do it separately
 
     $push->setMessage([
-        'message'=>'This is the message',
-        'title'=>'This is the title'
-    ]);
+           'notification' => [
+                   'title'=>'This is the title',
+                   'body'=>'This is the message',
+                   'sound' => 'default'
+                   ],
+           'data' => [
+                   'extraPayLoad1' => 'value1',
+                   'extraPayLoad2' => 'value2'
+                   ]
+           ]);
     $push->setApiKey('Server-API-Key');
     $push->setDevicesToken(['deviceToken1'
         ,'deviceToken2',
@@ -261,10 +285,78 @@ If you want send the notification to only 1 device, you may pass the value as st
 
 Method send() can be also chained to the above methods.
 
-    $push->setMessage(['message'=>'This is the message','title'=>'This is the title'])
-                        ->setApiKey('Server-API-Key')
-                        ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...])
-                        ->send();
+    $push->setMessage([
+           'notification' => [
+                   'title'=>'This is the title',
+                   'body'=>'This is the message',
+                   'sound' => 'default'
+                   ],
+           'data' => [
+                   'extraPayLoad1' => 'value1',
+                   'extraPayLoad2' => 'value2'
+                   ]
+           ])
+        ->setApiKey('Server-API-Key')
+        ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...])
+        ->send();
+
+### Understanding the Gcm and Fcm Message Payload
+
+#### Notification Message 
+
+Add a `notification` key when setting the message in `setMessage` method. like follows:
+
+```php
+$push->setMessage([
+           'notification' => [
+                   'title'=>'This is the title',
+                   'body'=>'This is the message',
+                   'sound' => 'default'
+                   ]
+           );        
+```
+
+You may add some extra payload adding a `data` key when setting the message in `setMessage` method.
+
+```php
+$push->setMessage([
+           'notification' => [
+                   'title'=>'This is the title',
+                   'body'=>'This is the message',
+                   'sound' => 'default'
+                   ],
+           'data' => [
+                   'extraPayLoad1' => 'value1',
+                   'extraPayLoad2' => 'value2'
+                   ]
+           ]);
+```
+
+#### Data Message 
+
+By default this package sends the notification as Data Message. So no need to add a `data` key. Just leave it without main keys.
+
+```php
+$push->setMessage([
+           'title'=>'This is the title',
+           'body'=>'This is the message',
+           'myCustomVAlue' => 'value'
+       ]);        
+```
+
+The above example is like you were sending the following:
+
+```php
+$push->setMessage([
+           'data' => [
+                   'title'=>'This is the title',
+                  'body'=>'This is the message',
+                  'myCustomVAlue' => 'value'
+                   ]
+           ]);
+```
+
+For more details, have a look at [gcm/fcm notification paypload support](https://firebase.google.com/docs/cloud-messaging/http-server-ref#notification-payload-support) and [the concept options](https://firebase.google.com/docs/cloud-messaging/concept-options)
 
 ### Getting the Notification Response
 
@@ -274,7 +366,7 @@ If you want to get the push service response, you can call the method `getFeedba
 
 Or again, chain it to the above methods:
 
-    $push->setMessage(['message'=>'This is the message','title'=>'This is the title'])
+    $push->setMessage(['body'=>'This is the message','title'=>'This is the title'])
                         ->setApiKey('Server-API-Key')
                         ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...])
                         ->send()
@@ -301,7 +393,17 @@ This method returns an array of unregistered tokens from the Push service provid
 After register the Alias Facade for this Package, you can use it like follows:
 
     PushNotification::setService('fcm')
-                            ->setMessage(['message'=>'This is the message','title'=>'This is the title'])
+                            ->setMessage([
+                                 'notification' => [
+                                         'title'=>'This is the title',
+                                         'body'=>'This is the message',
+                                         'sound' => 'default'
+                                         ],
+                                 'data' => [
+                                         'extraPayLoad1' => 'value1',
+                                         'extraPayLoad2' => 'value2'
+                                         ]
+                                 ])
                             ->setApiKey('Server-API-Key')
                             ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...])
                             ->send()
