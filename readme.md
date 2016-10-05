@@ -1,5 +1,10 @@
 # PushNotification Package
 
+[![Build Status](https://api.travis-ci.org/Edujugon/PushNotification.svg)](https://api.travis-ci.org/Edujugon/PushNotification)
+[![Total Downloads](https://poser.pugx.org/edujugon/push-notification/downloads)](https://packagist.org/packages/edujugon/push-notification)
+[![Latest Stable Version](https://poser.pugx.org/edujugon/push-notification/v/stable)](https://packagist.org/packages/edujugon/push-notification)
+[![License](https://poser.pugx.org/edujugon/push-notification/license)](https://packagist.org/packages/edujugon/push-notification)
+
 This is a lightly and easy to use package to send push notification.
 
 ####Push Service Providers Available:
