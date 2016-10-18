@@ -5,7 +5,7 @@
 [![Latest Stable Version](https://poser.pugx.org/edujugon/push-notification/v/stable)](https://packagist.org/packages/edujugon/push-notification)
 [![License](https://poser.pugx.org/edujugon/push-notification/license)](https://packagist.org/packages/edujugon/push-notification)
 
-This is a lightly and easy to use package to send push notification.
+This is an easy to use package to send push notification.
 
 ####Push Service Providers Available:
 
