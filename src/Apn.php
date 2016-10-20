@@ -139,7 +139,7 @@ class Apn extends PushService implements PushServiceInterface
     }
 
     /**
-     * Prepare the stream socket
+     * Compose the stream socket
      *
      * @return resource
      */
