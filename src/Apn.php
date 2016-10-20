@@ -137,16 +137,14 @@ class Apn extends PushService implements PushServiceInterface
         $this->messageNoExistCertificate();
         return false;
     }
-    /**
-     * Create the connection to APNS server
-     * If some error, the error is stored in class feedback property.
-     * IF OKAY, return connection
-     *
-     * @return bool|resource
-     */
-    private function openConnectionAPNS()
-    {
 
+    /**
+     * Prepare the stream socket
+     *
+     * @return resource
+     */
+    private function composeStreamSocket()
+    {
         $ctx = stream_context_create();
 
         //Already checked if certificate exists.
@@ -164,6 +162,21 @@ class Apn extends PushService implements PushServiceInterface
             $passFile = $this->config['passFile'];
             if(file_exists($passFile)) stream_context_set_option($ctx, 'ssl', 'local_pk', $passFile);
         }
+
+        return $ctx;
+    }
+
+    /**
+     * Create the connection to APNS server
+     * If some error, the error is stored in class feedback property.
+     * IF OKAY, return connection
+     *
+     * @return bool|resource
+     */
+    private function openConnectionAPNS()
+    {
+
+        $ctx = $this->composeStreamSocket();
 
         // Open a connection to the APNS server
         $fp = stream_socket_client(
@@ -194,7 +207,7 @@ class Apn extends PushService implements PushServiceInterface
 
         /**
          * If there isn't certificate returns the feedback.
-         * Feedback has been loaded in existCertificate method if no certifiate found
+         * Feedback has been loaded in existCertificate method if no certificate found
          */
         if(!$this->existCertificate()) return $this->feedback;
 
@@ -275,11 +288,9 @@ class Apn extends PushService implements PushServiceInterface
 
         if(!$this->existCertificate()) return $feedback_tokens;
 
-        $certificate = $this->config['certificate'];
-
         //connect to the APNS feedback servers
-        $stream_context = stream_context_create();
-        stream_context_set_option($stream_context, 'ssl', 'local_cert', $certificate);
+        $stream_context = $this->composeStreamSocket();
+
         $apns = stream_socket_client($this->feedbackUrl, $errcode, $errstr, 60, STREAM_CLIENT_CONNECT, $stream_context);
 
         //Read the data on the connection:
