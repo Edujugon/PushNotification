@@ -16,6 +16,18 @@ This is an easy to use package to send push notification.
 
 ## Installation
 
+### Laravel 5.0 - 5.1
+
+Update your composer.json file like below:
+
+`"edujugon/push-notification": "dev-laravel-5"`
+
+Then
+
+`composer update`
+
+### Laravel 5.2 and higher
+
 type in console:
 
         composer require edujugon/push-notification
@@ -27,7 +39,7 @@ Or update your composer.json file.
 
 Then
 
-    composer install
+    composer update
 
 ## Laravel 5.*
 
