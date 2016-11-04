@@ -386,11 +386,37 @@ Or again, chain it to the above methods:
 
 It will return an object with the response.
 
-### Check if there was any error sending the push notification
+### APN Server Feedback and package Feedback
 
-    if(isset($push->feedback->error)){
-        ....
+Any time you send a notification, it will check if APN server has any feedback for your certificate.
+If so, the responses are merged to our feedback like below:
+
+```
+class stdClass#21 (4) {
+  public $success =>
+  int(0)
+  public $failure =>
+  int(1)
+  public $tokenFailList =>
+  array(1) {
+    [0] =>
+    string(64) "c55741656e6c3185f3474291aebb5cf878b8719288e52bf4c497292b320312c5"
+  }
+  public $apnsFeedback =>
+  array(1) {
+    [0] =>
+    class stdClass#16 (3) {
+      public $timestamp =>
+      int(1478272639)
+      public $length =>
+      int(32)
+      public $devtoken =>
+      string(64) "c55741656e6c3185f3474291aebb5cf878b8719288e52bf4c497292b320312c5"
     }
+  }
+}
+
+```
 
 ### Get Unregistered Devices tokens
 
