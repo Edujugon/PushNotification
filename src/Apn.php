@@ -294,9 +294,15 @@ class Apn extends PushService implements PushServiceInterface
         if(!$this->existCertificate()) return $feedback_tokens;
 
         //connect to the APNS feedback servers
-        $stream_context = $this->composeStreamSocket();
+        $ctx = $this->composeStreamSocket();
 
-        $apns = stream_socket_client($this->feedbackUrl, $errcode, $errstr, 60, STREAM_CLIENT_CONNECT, $stream_context);
+        // Open a connection to the APNS server
+        try{
+            $apns = stream_socket_client($this->feedbackUrl, $errcode, $errstr, 60, STREAM_CLIENT_CONNECT, $ctx);
+        }catch (\Exception $e){
+            //if stream socket can't be established, try again
+            return $this->apnsFeedback();
+        }
 
         //Read the data on the connection:
         while(!feof($apns)) {
