@@ -173,15 +173,18 @@ class Apn extends PushService implements PushServiceInterface
      *
      * @return bool|resource
      */
-    private function openConnectionAPNS()
+    private function openConnectionAPNS($ctx)
     {
 
-        $ctx = $this->composeStreamSocket();
-
         // Open a connection to the APNS server
-        $fp = stream_socket_client(
-            $this->url, $err,
-            $errstr, 60, STREAM_CLIENT_CONNECT|STREAM_CLIENT_PERSISTENT, $ctx);
+        try{
+            $fp = stream_socket_client(
+                $this->url, $err,
+                $errstr, 60, STREAM_CLIENT_CONNECT|STREAM_CLIENT_PERSISTENT, $ctx);
+        }catch (\Exception $e){
+            //if stream socket can't be established, try again
+            return $this->openConnectionAPNS($ctx);
+        }
 
         stream_set_blocking ($fp, 0);
 
@@ -222,7 +225,9 @@ class Apn extends PushService implements PushServiceInterface
             /**
              * Open APN connection
              */
-            $fp = $this->openConnectionAPNS();
+            $ctx = $this->composeStreamSocket();
+
+            $fp = $this->openConnectionAPNS($ctx);
             if(!$fp) return $this->feedback;
 
 
@@ -289,9 +294,15 @@ class Apn extends PushService implements PushServiceInterface
         if(!$this->existCertificate()) return $feedback_tokens;
 
         //connect to the APNS feedback servers
-        $stream_context = $this->composeStreamSocket();
+        $ctx = $this->composeStreamSocket();
 
-        $apns = stream_socket_client($this->feedbackUrl, $errcode, $errstr, 60, STREAM_CLIENT_CONNECT, $stream_context);
+        // Open a connection to the APNS server
+        try{
+            $apns = stream_socket_client($this->feedbackUrl, $errcode, $errstr, 60, STREAM_CLIENT_CONNECT, $ctx);
+        }catch (\Exception $e){
+            //if stream socket can't be established, try again
+            return $this->apnsFeedback();
+        }
 
         //Read the data on the connection:
         while(!feof($apns)) {
@@ -326,7 +337,11 @@ class Apn extends PushService implements PushServiceInterface
 
         foreach ($deviceTokens as $token)
         {
-            if(in_array($token, $apnsTokens)) $feedback['success'] -= 1;
+            if(in_array($token, $apnsTokens)){
+                $feedback['success'] -= 1;
+                $feedback['tokenFailList'][] = $token;
+            }
+
         }
 
         return $feedback;
