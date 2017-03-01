@@ -52,7 +52,7 @@ Publish the package's configuration file to the application's own config directo
 
     php artisan vendor:publish --provider="Edujugon\PushNotification\Providers\PushNotificationServiceProvider" --tag="config"
 
-> Go to [laravel facade sample](https://github.com/edujugon/PushNotification#laravel-alias-facade) directly.
+> Go to [laravel facade sample](https://edujugon.github.io/PushNotification#laravel-alias-facade) directly.
 
 ### Configuration
 
@@ -113,20 +113,20 @@ Now you may use any method what you need. Please see the API List.
 
 ## API List
 
-- [setService](https://github.com/edujugon/PushNotification#setservice)
-- [setMessage](https://github.com/edujugon/PushNotification#setmessage)
-- [setDevicesToken](https://github.com/edujugon/PushNotification#setdevicestoken)
-- [send](https://github.com/edujugon/PushNotification#send)
-- [getFeedback](https://github.com/edujugon/PushNotification#getfeedback)
-- [getUnregisteredDeviceTokens](https://github.com/edujugon/PushNotification#getunregistereddevicetokens)
-- [setConfig](https://github.com/edujugon/PushNotification#setconfig)
-- [setUrl](https://github.com/edujugon/PushNotification#seturl)
+- [setService](https://edujugon.github.io/PushNotification#setservice)
+- [setMessage](https://edujugon.github.io/PushNotification#setmessage)
+- [setDevicesToken](https://edujugon.github.io/PushNotification#setdevicestoken)
+- [send](https://edujugon.github.io/PushNotification#send)
+- [getFeedback](https://edujugon.github.io/PushNotification#getfeedback)
+- [getUnregisteredDeviceTokens](https://edujugon.github.io/PushNotification#getunregistereddevicetokens)
+- [setConfig](https://edujugon.github.io/PushNotification#setconfig)
+- [setUrl](https://edujugon.github.io/PushNotification#seturl)
 
 ### Only for Gcm and Fcm
 
-- [setApiKey](https://github.com/edujugon/PushNotification#setapikey)
+- [setApiKey](https://edujugon.github.io/PushNotification#setapikey)
 
-> Go to [Usage samples](https://github.com/edujugon/PushNotification#usage-samples) directly.
+> Go to [Usage samples](https://edujugon.github.io/PushNotification#usage-samples) directly.
 
 #### setService
 
