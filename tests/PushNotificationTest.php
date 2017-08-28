@@ -297,7 +297,6 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
 
         $response = $push->setMessage(['message'=>'Hello World'])
             ->setApiKey('asdfasdffasdfasdfasdf')
-            ->setDevicesToken(['asdfasefaefwefwerwerwer'])
             ->setConfig(['dry_run' => false])
             ->sendByTopic('test')
             ->getFeedback();
@@ -312,7 +311,6 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
 
         $response = $push->setMessage(['message'=>'Hello World'])
             ->setApiKey('asdfasdffasdfasdfasdf')
-            ->setDevicesToken(['asdfasefaefwefwerwerwer'])
             ->setConfig(['dry_run' => false])
             ->sendByTopic("'dogs' in topics || 'cats' in topics",true)
             ->getFeedback();
