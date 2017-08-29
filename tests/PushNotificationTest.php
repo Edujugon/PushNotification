@@ -289,4 +289,32 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
 
         //var_dump($tokens);
     }
+
+    /** @test */
+    public function send_a_notification_by_topic_in_fcm()
+    {
+        $push = new PushNotification('fcm');
+
+        $response = $push->setMessage(['message'=>'Hello World'])
+            ->setApiKey('asdfasdffasdfasdfasdf')
+            ->setConfig(['dry_run' => false])
+            ->sendByTopic('test')
+            ->getFeedback();
+
+        $this->assertInstanceOf('stdClass',$response);
+    }
+
+    /** @test */
+    public function send_a_notification_by_condition_in_fcm()
+    {
+        $push = new PushNotification('fcm');
+
+        $response = $push->setMessage(['message'=>'Hello World'])
+            ->setApiKey('asdfasdffasdfasdfasdf')
+            ->setConfig(['dry_run' => false])
+            ->sendByTopic("'dogs' in topics || 'cats' in topics",true)
+            ->getFeedback();
+
+        $this->assertInstanceOf('stdClass',$response);
+    }
 }
