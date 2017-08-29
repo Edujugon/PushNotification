@@ -126,6 +126,10 @@ Now you may use any method what you need. Please see the API List.
 
 - [setApiKey](https://github.com/edujugon/PushNotification#setapikey)
 
+### Only for Fcm
+
+- [sendByTopic](https://github.com/edujugon/PushNotification#sendbytopic)
+
 > Go to [Usage samples](https://github.com/edujugon/PushNotification#usage-samples) directly.
 
 #### setService
@@ -222,6 +226,18 @@ object setUrl($url)
 ```
 > Not update the url unless it's really necessary.
 
+#### sendByTopic
+
+> Only for fcm
+
+`sendBytopic` method sends a message by topic. It also accepts topic condition. more details [here](https://firebase.google.com/docs/cloud-messaging/android/topic-messaging)
+>If isCondition is true, $topic will be treated as an expression
+**Syntax**
+
+```php
+object sendByTopic($topic,$isCondition)
+```
+
 ### Usage samples
 
 >You can chain the methods.
@@ -302,6 +318,25 @@ Method send() can be also chained to the above methods.
         ->setApiKey('Server-API-Key')
         ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...])
         ->send();
+
+### Send the Notification by Topic (**FCM** only)
+
+```php
+$push = new PushNotification('fcm');
+$response = $push->setMessage(['message'=>'Hello World'])
+            ->setApiKey('YOUR-API-KEY')
+            ->setConfig(['dry_run' => false])
+            ->sendByTopic('dogs');
+```
+
+or with a condition:
+```php
+$push = new PushNotification('fcm');
+$response = $push->setMessage(['message'=>'Hello World'])
+            ->setApiKey('YOUR-API-KEY')
+            ->setConfig(['dry_run' => false])
+            ->sendByTopic("'dogs' in topics || 'cats' in topics",true);
+```
 
 ### Understanding Gcm and Fcm Message Payload
 
