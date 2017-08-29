@@ -232,6 +232,7 @@ object setUrl($url)
 
 `sendBytopic` method sends a message by topic. It also accepts topic condition. more details [here](https://firebase.google.com/docs/cloud-messaging/android/topic-messaging)
 >If isCondition is true, $topic will be treated as an expression
+
 **Syntax**
 
 ```php
