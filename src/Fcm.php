@@ -22,7 +22,8 @@ class Fcm extends Gcm
     }
 
     /**
-     * Send notification by topic
+     * Send notification by topic.
+     * if isCondition is true, $topic will be treated as an expression
      *
      * @param $topic
      * @param bool $isCondition
