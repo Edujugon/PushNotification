@@ -64,7 +64,7 @@ class Fcm extends Gcm
      * @param $isCondition
      * @return array
      */
-    public function buildData($topic, $isCondition)
+    protected function buildData($topic, $isCondition)
     {
         if (!$isCondition) {
 
