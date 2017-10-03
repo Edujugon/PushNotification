@@ -15,12 +15,22 @@
         "illuminate/support": "^5.2"
     },
     "require-dev": {
-      "phpunit/phpunit": "4.0.*"
+        "phpunit/phpunit": "4.0.*"
     },
     "autoload": {
-      "psr-4": {
-        "Edujugon\\PushNotification\\": "src/"
-      }
+        "psr-4": {
+            "Edujugon\\PushNotification\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Edujugon\\PushNotification\\Providers\\PushNotificationServiceProvider"
+            ],
+            "aliases": {
+                "PushNotification": "Edujugon\\PushNotification\\Facades\\PushNotification"
+            }
+        }
     },
     "minimum-stability": "dev"
 }
