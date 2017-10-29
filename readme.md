@@ -34,14 +34,18 @@ composer require edujugon/push-notification
 
 ## Laravel 5.*
 
-Register the PushNotification service by adding it to the providers array.
+**Laravel 5.5 or higher?**
+
+Then you don't have to either register or add the alias, this package uses Package Auto-Discovery's feature, and should be available as soon as you install it via Composer.
+
+(Laravel < 5.5) Register the PushNotification service by adding it to the providers array.
 
     'providers' => array(
         ...
         Edujugon\PushNotification\Providers\PushNotificationServiceProvider::class
     )
 
-Let's add the Alias facade, add it to the aliases array.
+(Laravel < 5.5) Let's add the Alias facade, add it to the aliases array.
 
     'aliases' => array(
         ...
