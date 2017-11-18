@@ -26,14 +26,14 @@ class Fcm extends Gcm
      * if isCondition is true, $topic will be treated as an expression
      *
      * @param $topic
+     * @param $message
      * @param bool $isCondition
      * @return object
      */
-    public function sendByTopic($topic, $isCondition = false)
+    public function sendByTopic($topic,$message, $isCondition = false)
     {
         $headers = $this->addRequestHeaders();
-
-        $data = $this->buildData($topic, $isCondition);
+        $data = $this->buildData($topic, $message, $isCondition);
 
         try {
             $result = $this->client->post(
@@ -62,23 +62,14 @@ class Fcm extends Gcm
      * Prepare the data to be sent
      *
      * @param $topic
+     * @param $message
      * @param $isCondition
      * @return array
      */
-    protected function buildData($topic, $isCondition)
+    protected function buildData($topic, $message, $isCondition)
     {
-        if (!$isCondition) {
+        $condition = $isCondition ? ['condition' => $topic] : ['to' => '/topics/' . $topic];
 
-            return [
-                'to' => '/topics/' . $topic,
-                'data' => $this->message
-            ];
-
-        } else {
-            return [
-                'condition' => $topic,
-                'data' => $this->message
-            ];
-        }
+        return array_merge($condition , $this->buildMessage($message));
     }
 }
