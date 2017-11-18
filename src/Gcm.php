@@ -86,7 +86,7 @@ class Gcm extends PushService implements PushServiceInterface
      * @param $message
      * @return array
      */
-    private function buildMessage($message)
+    protected function buildMessage($message)
     {
         // if NO notification and data keys, then set Data Message as default.
         if(!array_key_exists('data',$message) && !array_key_exists('notification',$message))
