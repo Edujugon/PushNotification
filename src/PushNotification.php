@@ -174,7 +174,7 @@ class PushNotification
     public function sendByTopic($topic, $isCondition = false)
     {
       if($this->service instanceof Fcm)
-          $this->service->sendByTopic($topic,$isCondition);
+          $this->service->sendByTopic($topic, $this->message, $isCondition);
 
       return $this;
     }
