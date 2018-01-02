@@ -41,6 +41,10 @@ abstract class PushChannel
 
         if (! empty($message->config)) {
             $this->push->setConfig($message->config);
+
+            if (! empty($message->config['apiKey'])) {
+                $this->push->setApiKey($message->config['apiKey']);
+            }
         }
 
         $feedback = $this->push->send()
