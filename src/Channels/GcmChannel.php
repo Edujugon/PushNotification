@@ -5,7 +5,7 @@ namespace Edujugon\PushNotification\Channels;
 use Edujugon\PushNotification\Messages\PushMessage;
 use Illuminate\Notifications\Notification;
 
-class FcmChannel extends PushChannel
+class GcmChannel extends PushChannel
 {
     /**
      * Send the given notification.
@@ -16,11 +16,11 @@ class FcmChannel extends PushChannel
      */
     public function send($notifiable, Notification $notification)
     {
-        if (! $to = $notifiable->routeNotificationFor('Fcm')) {
+        if (! $to = $notifiable->routeNotificationFor('Gcm')) {
             return;
         }
 
-        $message = $notification->toFcm($notifiable);
+        $message = $notification->toGcm($notifiable);
 
         if (is_string($message)) {
             $message = new PushMessage($message);
@@ -38,6 +38,6 @@ class FcmChannel extends PushChannel
             $data['data'] = $message->extra;
         }
 
-        return $this->push('fcm', $to, $data, $message);
+        return $this->push('gpn', $to, $data, $message);
     }
 }

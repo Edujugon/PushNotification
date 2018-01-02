@@ -2,29 +2,11 @@
 
 namespace Edujugon\PushNotification\Channels;
 
-use Edujugon\PushNotification\Events\NotificationPushed;
 use Edujugon\PushNotification\Messages\PushMessage;
-use Edujugon\PushNotification\PushNotification;
 use Illuminate\Notifications\Notification;
 
-class ApnChannel
+class ApnChannel extends PushChannel
 {
-    /**
-     * @var \Edujugon\PushNotification\PushNotification
-     */
-    protected $push;
-
-    /**
-     * Create a new Apn channel instance.
-     *
-     * @param  \Edujugon\PushNotification\Facades\PushNotification $push
-     * @return void
-     */
-    public function __construct(PushNotification $push)
-    {
-        $this->push = $push;
-    }
-
     /**
      * Send the given notification.
      *
@@ -58,19 +40,6 @@ class ApnChannel
             $data['extraPayLoad'] = $message->extra;
         }
 
-        $this->push->setMessage($data)
-            ->setService('apn')
-            ->setDevicesToken($to);
-
-        if (! empty($message->config)) {
-            $this->push->setConfig($message->config);
-        }
-
-        $feedback = $this->push->send()
-            ->getFeedback();
-
-        broadcast(new NotificationPushed($this->push));
-
-        return $feedback;
+        return $this->push('apn', $to, $data, $message);
     }
 }
