@@ -498,7 +498,7 @@ It would return the Push Feedback of the Notification sent.
 ### Notification channels
 
 #### Formatting Push Notifications
-If a notification supports being sent as an push message, you should define  `toApn` `toFcm` `toGcm` methods on the notification class. This method will receive a `$notifiable` entity and should return a  `Edujugon\PushNotification\Messages\PushMessage` instance:
+If a notification supports being sent as an push message, you should define  `toApn` and/or `toFcm`/`toGcm` methods on the notification class. This method will receive a `$notifiable` entity and should return a  `Edujugon\PushNotification\Messages\PushMessage` instance:
 
 ```php
 public function toApn($notifiable)
@@ -538,7 +538,7 @@ public function toApn($notifiable)
 ```
 
 #### Routing Push Notifications
-Just define `routeNotificationForApn` `routeNotificationForFcm` `routeNotificationForGcm` methods on the entity
+Just define `routeNotificationForApn` and/or `routeNotificationForFcm`/`routeNotificationForGcm` methods on the entity
 ```php
 /**
  * Route notifications for the Apn channel.
