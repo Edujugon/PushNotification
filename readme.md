@@ -39,25 +39,22 @@ composer require edujugon/push-notification
 Then you don't have to either register or add the alias, this package uses Package Auto-Discovery's feature, and should be available as soon as you install it via Composer.
 
 (Laravel < 5.5) Register the PushNotification service by adding it to the providers array.
-```php
-'providers' => array(
-    ...
-    Edujugon\PushNotification\Providers\PushNotificationServiceProvider::class
-)
-```
+
+    'providers' => array(
+        ...
+        Edujugon\PushNotification\Providers\PushNotificationServiceProvider::class
+    )
 
 (Laravel < 5.5) Let's add the Alias facade, add it to the aliases array.
-```php
-'aliases' => array(
-    ...
-    'PushNotification' => Edujugon\PushNotification\Facades\PushNotification::class,
-)
-```
+
+    'aliases' => array(
+        ...
+        'PushNotification' => Edujugon\PushNotification\Facades\PushNotification::class,
+    )
 
 Publish the package's configuration file to the application's own config directory
-```
-php artisan vendor:publish --provider="Edujugon\PushNotification\Providers\PushNotificationServiceProvider" --tag="config"
-```
+
+    php artisan vendor:publish --provider="Edujugon\PushNotification\Providers\PushNotificationServiceProvider" --tag="config"
 
 > Go to [laravel facade sample](https://github.com/edujugon/PushNotification#laravel-alias-facade) directly.
 
@@ -72,13 +69,13 @@ The default configuration parameters for **GCM** and **FCM** are :
 *   apiKey => Your ApiKey
 
 You can dynamically update those values or adding new ones calling the method setConfig like so:
-```php
-$push->setConfig([
-    'priority' => 'high',
-    'dry_run' => true,
-    'time_to_live' => 3
-]);
-```
+
+    $push->setConfig([
+        'priority' => 'high',
+        'dry_run' => true,
+        'time_to_live' => 3
+    ]);
+
 
 The default configuration parameters for **APN** are:
 
@@ -88,37 +85,32 @@ The default configuration parameters for **APN** are:
 *   ```dry_run => false```
 
 Also you can update those values and add more dynamically
-```php
-$push->setConfig([
-    'passPhrase' => 'NewPass',
-    'custom' => 'MycustomValue',
-    'dry_run' => true
-]);
-```
+
+    $push->setConfig([
+        'passPhrase' => 'NewPass',
+        'custom' => 'MycustomValue',
+        'dry_run' => true
+    ]);
 
 Even you may update the url of the Push Service dynamically like follows:
-```php
-$push->setUrl('http://newPushServiceUrl.com');
-```
+
+    $puhs->setUrl('http://newPushServiceUrl.com');
 
 > Not update the url unless it's really necessary.
 
 ## Usage
-```php
-$push = new PushNotification;
-```
+
+    $push = new PushNotification;
 
 By default it will use GCM as Push Service provider.
 
 For APN Service:
-```php
-$push = new PushNotification('apn');
-```
+
+    $push = new PushNotification('apn');
 
 For FCM Service:
-```php
-$push = new PushNotification('fcm');
-```
+
+    $push = new PushNotification('fcm');
 
 Now you may use any method what you need. Please see the API List.
 
@@ -263,11 +255,11 @@ $push->setMessage([
                 'title'=>'This is the title',
                 'body'=>'This is the message',
                 'sound' => 'default'
-          ],
+                ],
         'data' => [
                 'extraPayLoad1' => 'value1',
                 'extraPayLoad2' => 'value2'
-          ]
+                ]
         ])
         ->setApiKey('Server-API-Key')
         ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...]);
@@ -304,9 +296,8 @@ $push->setMessage([
                ]
        ]);
 $push->setApiKey('Server-API-Key');
-$push->setDevicesToken([
-  'deviceToken1',
-    'deviceToken2',
+$push->setDevicesToken(['deviceToken1'
+    ,'deviceToken2',
     'deviceToken3'
 ]);
 ```
@@ -324,11 +315,11 @@ $push->setMessage([
                'title'=>'This is the title',
                'body'=>'This is the message',
                'sound' => 'default'
-         ],
+               ],
        'data' => [
                'extraPayLoad1' => 'value1',
                'extraPayLoad2' => 'value2'
-         ]
+               ]
        ])
     ->setApiKey('Server-API-Key')
     ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...])
@@ -366,7 +357,7 @@ $push->setMessage([
                    'title'=>'This is the title',
                    'body'=>'This is the message',
                    'sound' => 'default'
-             ]
+                   ]
            );
 ```
 
@@ -378,11 +369,11 @@ $push->setMessage([
                    'title'=>'This is the title',
                    'body'=>'This is the message',
                    'sound' => 'default'
-             ],
+                   ],
            'data' => [
                    'extraPayLoad1' => 'value1',
                    'extraPayLoad2' => 'value2'
-           ]
+                   ]
            ]);
 ```
 
@@ -406,7 +397,7 @@ $push->setMessage([
                    'title'=>'This is the title',
                   'body'=>'This is the message',
                   'myCustomVAlue' => 'value'
-             ]
+                   ]
            ]);
 ```
 
@@ -416,16 +407,16 @@ For more details, have a look at [gcm/fcm notification paypload support](https:/
 
 If you want to get the push service response, you can call the method `getFeedback`:
 ```php
-$push->getFeedback();
+    $push->getFeedback();
 ```
 
 Or again, chain it to the above methods:
 ```php
-$push->setMessage(['body'=>'This is the message','title'=>'This is the title'])
-     ->setApiKey('Server-API-Key')
-     ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...])
-     ->send()
-     ->getFeedback();
+    $push->setMessage(['body'=>'This is the message','title'=>'This is the title'])
+                        ->setApiKey('Server-API-Key')
+                        ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...])
+                        ->send()
+                        ->getFeedback();
 ```
 
 It will return an object with the response.
@@ -481,11 +472,11 @@ PushNotification::setService('fcm')
                                      'title'=>'This is the title',
                                      'body'=>'This is the message',
                                      'sound' => 'default'
-                               ],
+                                     ],
                              'data' => [
                                      'extraPayLoad1' => 'value1',
                                      'extraPayLoad2' => 'value2'
-                               ]
+                                     ]
                              ])
                         ->setApiKey('Server-API-Key')
                         ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...])
