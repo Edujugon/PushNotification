@@ -16,8 +16,7 @@ abstract class PushChannel
     /**
      * Create a new Apn channel instance.
      *
-     * @param  \Edujugon\PushNotification\Facades\PushNotification $push
-     * @return void
+     * @param  \Edujugon\PushNotification\PushNotification $push
      */
     public function __construct(PushNotification $push)
     {
