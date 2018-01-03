@@ -2,30 +2,20 @@
 
 namespace Edujugon\PushNotification\Channels;
 
-use Edujugon\PushNotification\Messages\PushMessage;
-use Illuminate\Notifications\Notification;
-
 class GcmChannel extends PushChannel
 {
-    /**
-     * Send the given notification.
-     *
-     * @param  mixed  $notifiable
-     * @param  \Illuminate\Notifications\Notification  $notification
-     * @return void
-     */
-    public function send($notifiable, Notification $notification)
+    protected function pushServiceName()
     {
-        if (! $to = $notifiable->routeNotificationFor('Gcm')) {
-            return;
-        }
+        return 'gcm';
+    }
 
-        $message = $notification->toGcm($notifiable);
+    protected function extraDataName()
+    {
+        return 'data';
+    }
 
-        if (is_string($message)) {
-            $message = new PushMessage($message);
-        }
-
+    protected function buildData($message)
+    {
         $data = [
             'notification' => [
                 'title' => $message->title,
@@ -35,9 +25,9 @@ class GcmChannel extends PushChannel
         ];
 
         if (! empty($message->extra)) {
-            $data['data'] = $message->extra;
+            $data[$this->extraDataName()] = $message->extra;
         }
 
-        $this->push('gcm', $to, $data, $message);
+        return $data;
     }
 }
