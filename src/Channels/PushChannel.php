@@ -49,7 +49,7 @@ abstract class PushChannel
         $feedback = $this->push->send()
             ->getFeedback();
 
-        broadcast(new NotificationPushed($this->push));
+        event(new NotificationPushed($this->push));
 
         return $feedback;
     }

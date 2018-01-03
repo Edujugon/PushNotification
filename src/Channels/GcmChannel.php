@@ -38,6 +38,6 @@ class GcmChannel extends PushChannel
             $data['data'] = $message->extra;
         }
 
-        return $this->push('gpn', $to, $data, $message);
+        $this->push('gcm', $to, $data, $message);
     }
 }
