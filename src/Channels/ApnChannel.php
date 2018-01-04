@@ -2,30 +2,20 @@
 
 namespace Edujugon\PushNotification\Channels;
 
-use Edujugon\PushNotification\Messages\PushMessage;
-use Illuminate\Notifications\Notification;
-
 class ApnChannel extends PushChannel
 {
-    /**
-     * Send the given notification.
-     *
-     * @param  mixed  $notifiable
-     * @param  \Illuminate\Notifications\Notification  $notification
-     * @return void
-     */
-    public function send($notifiable, Notification $notification)
+    protected function pushServiceName()
     {
-        if (! $to = $notifiable->routeNotificationFor('Apn')) {
-            return;
-        }
+        return 'apn';
+    }
 
-        $message = $notification->toApn($notifiable);
+    protected function extraDataName()
+    {
+        return 'extraPayLoad';
+    }
 
-        if (is_string($message)) {
-            $message = new PushMessage($message);
-        }
-
+    protected function buildData($message)
+    {
         $data = [
             'aps' => [
                 'alert' => [
@@ -37,9 +27,9 @@ class ApnChannel extends PushChannel
         ];
 
         if (! empty($message->extra)) {
-            $data['extraPayLoad'] = $message->extra;
+            $data[$this->extraDataName()] = $message->extra;
         }
 
-        return $this->push('apn', $to, $data, $message);
+        return $data;
     }
 }

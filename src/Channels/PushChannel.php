@@ -5,6 +5,7 @@ namespace Edujugon\PushNotification\Channels;
 use Edujugon\PushNotification\Events\NotificationPushed;
 use Edujugon\PushNotification\Messages\PushMessage;
 use Edujugon\PushNotification\PushNotification;
+use Illuminate\Notifications\Notification;
 
 abstract class PushChannel
 {
@@ -21,6 +22,26 @@ abstract class PushChannel
     public function __construct(PushNotification $push)
     {
         $this->push = $push;
+    }
+
+    /**
+     * Send the given notification.
+     *
+     * @param  mixed  $notifiable
+     * @param  \Illuminate\Notifications\Notification  $notification
+     * @return void
+     */
+    public function send($notifiable, Notification $notification)
+    {
+        if (! $to = $notifiable->routeNotificationFor($this->notificationFor())) {
+            return;
+        }
+
+        $message = $this->buildMessage($notifiable,$notification);
+
+        $data = $this->buildData($message);
+
+        $this->push($this->pushServiceName(), $to, $data, $message);
     }
 
     /**
@@ -49,8 +70,43 @@ abstract class PushChannel
         $feedback = $this->push->send()
             ->getFeedback();
 
-        event(new NotificationPushed($this->push));
+        if(function_exists('broadcast')) {
+            broadcast(new NotificationPushed($this->push));
+        }elseif (function_exists('event')) {
+            event(new NotificationPushed($this->push));
+        }
 
         return $feedback;
     }
+
+    protected function buildMessage($notifiable,$notification)
+    {
+        $message = call_user_func_array([$notification,$this->getToMethod()], [$notifiable]);
+
+        if (is_string($message)) {
+            $message = new PushMessage($message);
+        }
+
+        return $message;
+    }
+
+    /**
+     * @return string
+     */
+    protected function getToMethod()
+    {
+        return "to" . ucfirst($this->pushServiceName());
+    }
+
+    /**
+     * @return string
+     */
+    protected function notificationFor()
+    {
+        return ucfirst(strtolower($this->pushServiceName()));
+    }
+
+    protected abstract function buildData($message);
+    protected abstract function pushServiceName();
+    protected abstract function extraDataName();
 }

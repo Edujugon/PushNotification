@@ -20,7 +20,6 @@ class NotificationPushed
      * Create a new event instance.
      *
      * @param  \Edujugon\PushNotification\PushNotification $push
-     * @return void
      */
     public function __construct(PushNotification $push)
     {
