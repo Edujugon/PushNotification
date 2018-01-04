@@ -4,16 +4,17 @@ namespace Edujugon\PushNotification\Channels;
 
 class ApnChannel extends PushChannel
 {
+    /**
+     * {@inheritdoc}
+     */
     protected function pushServiceName()
     {
         return 'apn';
     }
 
-    protected function extraDataName()
-    {
-        return 'extraPayLoad';
-    }
-
+    /**
+     * {@inheritdoc}
+     */
     protected function buildData($message)
     {
         $data = [
@@ -27,7 +28,7 @@ class ApnChannel extends PushChannel
         ];
 
         if (! empty($message->extra)) {
-            $data[$this->extraDataName()] = $message->extra;
+            $data['extraPayLoad'] = $message->extra;
         }
 
         return $data;

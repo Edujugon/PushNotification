@@ -4,16 +4,17 @@ namespace Edujugon\PushNotification\Channels;
 
 class GcmChannel extends PushChannel
 {
+    /**
+     * {@inheritdoc}
+     */
     protected function pushServiceName()
     {
         return 'gcm';
     }
 
-    protected function extraDataName()
-    {
-        return 'data';
-    }
-
+    /**
+     * {@inheritdoc}
+     */
     protected function buildData($message)
     {
         $data = [
@@ -25,7 +26,7 @@ class GcmChannel extends PushChannel
         ];
 
         if (! empty($message->extra)) {
-            $data[$this->extraDataName()] = $message->extra;
+            $data['data'] = $message->extra;
         }
 
         return $data;

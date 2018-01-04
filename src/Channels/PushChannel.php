@@ -37,7 +37,7 @@ abstract class PushChannel
             return;
         }
 
-        $message = $this->buildMessage($notifiable,$notification);
+        $message = $this->buildMessage($notifiable, $notification);
 
         $data = $this->buildData($message);
 
@@ -70,18 +70,25 @@ abstract class PushChannel
         $feedback = $this->push->send()
             ->getFeedback();
 
-        if(function_exists('broadcast')) {
+        if (function_exists('broadcast')) {
             broadcast(new NotificationPushed($this->push));
-        }elseif (function_exists('event')) {
+        } elseif (function_exists('event')) {
             event(new NotificationPushed($this->push));
         }
 
         return $feedback;
     }
 
-    protected function buildMessage($notifiable,$notification)
+    /**
+     * Format the message.
+     *
+     * @param  mixed $notifiable
+     * @param  \Illuminate\Notifications\Notification  $notification
+     * @return \Edujugon\PushNotification\Messages\PushMessage
+     */
+    protected function buildMessage($notifiable, Notification $notification)
     {
-        $message = call_user_func_array([$notification,$this->getToMethod()], [$notifiable]);
+        $message = call_user_func_array([$notification, $this->getToMethod()], [$notifiable]);
 
         if (is_string($message)) {
             $message = new PushMessage($message);
@@ -91,14 +98,18 @@ abstract class PushChannel
     }
 
     /**
+     * Get the method name to get the push notification representation of the notification.
+     *
      * @return string
      */
     protected function getToMethod()
     {
-        return "to" . ucfirst($this->pushServiceName());
+        return 'to' . ucfirst($this->pushServiceName());
     }
 
     /**
+     * Format push service name for routing notification.
+     *
      * @return string
      */
     protected function notificationFor()
@@ -106,7 +117,18 @@ abstract class PushChannel
         return ucfirst(strtolower($this->pushServiceName()));
     }
 
-    protected abstract function buildData($message);
-    protected abstract function pushServiceName();
-    protected abstract function extraDataName();
+    /**
+     * Build the push payload data.
+     *
+     * @param  \Edujugon\PushNotification\Messages\PushMessage $message
+     * @return array
+     */
+    abstract protected function buildData(PushMessage $message);
+
+    /**
+     * Get push notification service name.
+     *
+     * @return string
+     */
+    abstract protected function pushServiceName();
 }
