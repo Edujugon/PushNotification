@@ -2,6 +2,8 @@
 
 namespace Edujugon\PushNotification\Channels;
 
+use Edujugon\PushNotification\Messages\PushMessage;
+
 class GcmChannel extends PushChannel
 {
     /**
@@ -15,7 +17,7 @@ class GcmChannel extends PushChannel
     /**
      * {@inheritdoc}
      */
-    protected function buildData($message)
+    protected function buildData(PushMessage $message)
     {
         $data = [
             'notification' => [
