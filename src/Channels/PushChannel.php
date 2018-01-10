@@ -70,11 +70,7 @@ abstract class PushChannel
         $feedback = $this->push->send()
             ->getFeedback();
 
-        if (function_exists('broadcast')) {
-            broadcast(new NotificationPushed($this->push));
-        } elseif (function_exists('event')) {
-            event(new NotificationPushed($this->push));
-        }
+        $this->broadcast();
 
         return $feedback;
     }
@@ -126,9 +122,22 @@ abstract class PushChannel
     abstract protected function buildData(PushMessage $message);
 
     /**
+     * BroadCast NotificationPushed event
+     */
+    protected function broadcast()
+    {
+        if (function_exists('broadcast')) {
+            broadcast(new NotificationPushed($this->push));
+        } elseif (function_exists('event')) {
+            event(new NotificationPushed($this->push));
+        }
+    }
+
+    /**
      * Get push notification service name.
      *
      * @return string
      */
     abstract protected function pushServiceName();
+
 }
