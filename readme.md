@@ -39,22 +39,25 @@ composer require edujugon/push-notification
 Then you don't have to either register or add the alias, this package uses Package Auto-Discovery's feature, and should be available as soon as you install it via Composer.
 
 (Laravel < 5.5) Register the PushNotification service by adding it to the providers array.
-
-    'providers' => array(
-        ...
-        Edujugon\PushNotification\Providers\PushNotificationServiceProvider::class
-    )
+```php
+'providers' => array(
+    ...
+    Edujugon\PushNotification\Providers\PushNotificationServiceProvider::class
+)
+```
 
 (Laravel < 5.5) Let's add the Alias facade, add it to the aliases array.
-
-    'aliases' => array(
-        ...
-        'PushNotification' => Edujugon\PushNotification\Facades\PushNotification::class,
-    )
+```php
+'aliases' => array(
+    ...
+    'PushNotification' => Edujugon\PushNotification\Facades\PushNotification::class,
+)
+```
 
 Publish the package's configuration file to the application's own config directory
-
-    php artisan vendor:publish --provider="Edujugon\PushNotification\Providers\PushNotificationServiceProvider" --tag="config"
+```
+php artisan vendor:publish --provider="Edujugon\PushNotification\Providers\PushNotificationServiceProvider" --tag="config"
+```
 
 > Go to [laravel facade sample](https://github.com/edujugon/PushNotification#laravel-alias-facade) directly.
 
@@ -69,49 +72,55 @@ The default configuration parameters for **GCM** and **FCM** are :
 *   apiKey => Your ApiKey
 
 You can dynamically update those values or adding new ones calling the method setConfig like so:
-
-    $push->setConfig([
-        'priority' => 'high',
-        'dry_run' => true,
-        'time_to_live' => 3
-    ]);
+```php
+$push->setConfig([
+    'priority' => 'high',
+    'dry_run' => true,
+    'time_to_live' => 3
+]);
+```
 
 
 The default configuration parameters for **APN** are:
 
-*   ```certificate => __DIR__ . '/iosCertificates/yourCertificate.pem'```
-*   ```passPhrase => 'MyPassPhrase'```
+*   ```certificate => __DIR__ . '/iosCertificates/yourCertificate.pem'```
+*   ```passPhrase => 'MyPassPhrase'```
 *   ```passFile => __DIR__ . '/iosCertificates/yourKey.pem' //Optional```
 *   ```dry_run => false```
 
 Also you can update those values and add more dynamically
-
-    $push->setConfig([
-        'passPhrase' => 'NewPass',
-        'custom' => 'MycustomValue',
-        'dry_run' => true
-    ]);
+```php
+$push->setConfig([
+    'passPhrase' => 'NewPass',
+    'custom' => 'MycustomValue',
+    'dry_run' => true
+]);
+```
 
 Even you may update the url of the Push Service dynamically like follows:
-
-    $puhs->setUrl('http://newPushServiceUrl.com');
+```php
+$push->setUrl('http://newPushServiceUrl.com');
+```
 
 > Not update the url unless it's really necessary.
 
 ## Usage
-
-    $push = new PushNotification;
+```php
+$push = new PushNotification;
+```
 
 By default it will use GCM as Push Service provider.
 
 For APN Service:
-
-    $push = new PushNotification('apn');
+```php
+$push = new PushNotification('apn');
+```
 
 For FCM Service:
+```php
+$push = new PushNotification('fcm');
+```
 
-    $push = new PushNotification('fcm');
-    
 Now you may use any method what you need. Please see the API List.
 
 
@@ -200,7 +209,7 @@ object getFeedback()
 
 #### getUnregisteredDeviceTokens
 
-`getUnregisteredDeviceTokens` method gets the devices' tokens that couldn't receive the notification because they aren't registered to the Push service provider. 
+`getUnregisteredDeviceTokens` method gets the devices' tokens that couldn't receive the notification because they aren't registered to the Push service provider.
 You may use it chaining it to `send` method or call it whenever after sending a notification.
 
 **Syntax**
@@ -250,79 +259,81 @@ object sendByTopic($topic,$isCondition)
 GCM sample:
 
 ```php
-    $push->setMessage([
-            'notification' => [
-                    'title'=>'This is the title',
-                    'body'=>'This is the message',
-                    'sound' => 'default'
-                    ],
-            'data' => [
-                    'extraPayLoad1' => 'value1',
-                    'extraPayLoad2' => 'value2'
-                    ]
-            ])
-            ->setApiKey('Server-API-Key')
-            ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...]);
+$push->setMessage([
+        'notification' => [
+                'title'=>'This is the title',
+                'body'=>'This is the message',
+                'sound' => 'default'
+                ],
+        'data' => [
+                'extraPayLoad1' => 'value1',
+                'extraPayLoad2' => 'value2'
+                ]
+        ])
+        ->setApiKey('Server-API-Key')
+        ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...]);
 ```
 
 APN sample:
-
-    $push->setMessage([
-                'aps' => [
-                    'alert' => [
-                        'title' => 'This is the title',
-                        'body' => 'This is the body'
-                    ],
-                    'sound' => 'default'
-
+```php
+$push->setMessage([
+            'aps' => [
+                'alert' => [
+                    'title' => 'This is the title',
+                    'body' => 'This is the body'
                 ],
-                'extraPayLoad' => [
-                    'custom' => 'My custom data',
-                ]
-            ])
-        ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...]);
+                'sound' => 'default'
 
+            ],
+            'extraPayLoad' => [
+                'custom' => 'My custom data',
+            ]
+        ])
+    ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...]);
+```
 or do it separately
-
-    $push->setMessage([
-           'notification' => [
-                   'title'=>'This is the title',
-                   'body'=>'This is the message',
-                   'sound' => 'default'
-                   ],
-           'data' => [
-                   'extraPayLoad1' => 'value1',
-                   'extraPayLoad2' => 'value2'
-                   ]
-           ]);
-    $push->setApiKey('Server-API-Key');
-    $push->setDevicesToken(['deviceToken1'
-        ,'deviceToken2',
-        'deviceToken3'
-    ]);
-
+```php
+$push->setMessage([
+       'notification' => [
+               'title'=>'This is the title',
+               'body'=>'This is the message',
+               'sound' => 'default'
+               ],
+       'data' => [
+               'extraPayLoad1' => 'value1',
+               'extraPayLoad2' => 'value2'
+               ]
+       ]);
+$push->setApiKey('Server-API-Key');
+$push->setDevicesToken(['deviceToken1'
+    ,'deviceToken2',
+    'deviceToken3'
+]);
+```
 If you want send the notification to only 1 device, you may pass the value as string.
-
-    $push->setDevicesToken('deviceToken');
+```php
+$push->setDevicesToken('deviceToken');
+```
 
 ### Send the Notification
 
 Method send() can be also chained to the above methods.
-
-    $push->setMessage([
-           'notification' => [
-                   'title'=>'This is the title',
-                   'body'=>'This is the message',
-                   'sound' => 'default'
-                   ],
-           'data' => [
-                   'extraPayLoad1' => 'value1',
-                   'extraPayLoad2' => 'value2'
-                   ]
-           ])
-        ->setApiKey('Server-API-Key')
-        ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...])
-        ->send();
+```php
+$push->setMessage([
+       'notification' => [
+               'title'=>'This is the title',
+               'body'=>'This is the message',
+               'sound' => 'default'
+               ],
+       'data' => [
+               'extraPayLoad1' => 'value1',
+               'extraPayLoad2' => 'value2'
+               ]
+       ])
+    ->setApiKey('Server-API-Key')
+    ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...])
+    ->send();
+```
 
 ### Send the Notification by Topic (**FCM** only)
 
@@ -345,7 +356,7 @@ $response = $push->setMessage(['message'=>'Hello World'])
 
 ### Understanding Gcm and Fcm Message Payload
 
-#### Notification Message 
+#### Notification Message
 
 Add a `notification` key when setting the message in `setMessage` method. like follows:
 
@@ -356,7 +367,7 @@ $push->setMessage([
                    'body'=>'This is the message',
                    'sound' => 'default'
                    ]
-           );        
+           );
 ```
 
 You may add some extra payload adding a `data` key when setting the message in `setMessage` method.
@@ -375,7 +386,7 @@ $push->setMessage([
            ]);
 ```
 
-#### Data Message 
+#### Data Message
 
 By default this package sends the notification as Data Message. So no need to add a `data` key. Just leave it without main keys.
 
@@ -384,7 +395,7 @@ $push->setMessage([
            'title'=>'This is the title',
            'body'=>'This is the message',
            'myCustomVAlue' => 'value'
-       ]);        
+       ]);
 ```
 
 The above example is like you were sending the following:
@@ -404,16 +415,18 @@ For more details, have a look at [gcm/fcm notification paypload support](https:/
 ### Getting the Notification Response
 
 If you want to get the push service response, you can call the method `getFeedback`:
-
+```php
     $push->getFeedback();
+```
 
 Or again, chain it to the above methods:
-
+```php
     $push->setMessage(['body'=>'This is the message','title'=>'This is the title'])
                         ->setApiKey('Server-API-Key')
                         ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...])
                         ->send()
                         ->getFeedback();
+```
 
 It will return an object with the response.
 
@@ -422,7 +435,7 @@ It will return an object with the response.
 Any time you send a notification, it will check if APN server has any feedback for your certificate.
 If so, the responses are merged to our feedback like below:
 
-```
+```php
 class stdClass#21 (4) {
   public $success =>
   int(0)
@@ -452,30 +465,88 @@ class stdClass#21 (4) {
 ### Get Unregistered Devices tokens
 
 After sending a notification, you may retrieve the list of unregistered tokens
-
-    $push->getUnregisteredDeviceTokens();
+```php
+$push->getUnregisteredDeviceTokens();
+```
 
 This method returns an array of unregistered tokens from the Push service provider. If there isn't any unregistered token, it will return an empty array.
 
 ### Laravel Alias Facade
 
 After register the Alias Facade for this Package, you can use it like follows:
-
-    PushNotification::setService('fcm')
-                            ->setMessage([
-                                 'notification' => [
-                                         'title'=>'This is the title',
-                                         'body'=>'This is the message',
-                                         'sound' => 'default'
-                                         ],
-                                 'data' => [
-                                         'extraPayLoad1' => 'value1',
-                                         'extraPayLoad2' => 'value2'
-                                         ]
-                                 ])
-                            ->setApiKey('Server-API-Key')
-                            ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...])
-                            ->send()
-                            ->getFeedback();
+```php
+PushNotification::setService('fcm')
+                        ->setMessage([
+                             'notification' => [
+                                     'title'=>'This is the title',
+                                     'body'=>'This is the message',
+                                     'sound' => 'default'
+                                     ],
+                             'data' => [
+                                     'extraPayLoad1' => 'value1',
+                                     'extraPayLoad2' => 'value2'
+                                     ]
+                             ])
+                        ->setApiKey('Server-API-Key')
+                        ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...])
+                        ->send()
+                        ->getFeedback();
+```
 
 It would return the Push Feedback of the Notification sent.
+
+### Notification channels
+
+#### Formatting Push Notifications
+If a notification supports being sent as an push message, you should define  `toApn` and/or `toFcm`/`toGcm` methods on the notification class. This method will receive a `$notifiable` entity and should return a  `Edujugon\PushNotification\Messages\PushMessage` instance:
+
+```php
+public function toApn($notifiable)
+{
+    return new PushMessage('Hello world');
+}
+```
+
+#### Customizing The Title and Body
+```php
+public function toApn($notifiable)
+{
+    return (new PushMessage)
+        ->title('Hello world')
+        ->body('...');
+}
+```
+
+#### Customizing The Notification Sound
+```php
+public function toApn($notifiable)
+{
+    return (new PushMessage)
+        ->body('Hello world')
+        ->sound('default');
+}
+```
+
+#### Passing Service Config
+```php
+public function toApn($notifiable)
+{
+    return (new PushMessage)
+        ->body('Hello world')
+        ->config(['dry_run' => false]);
+}
+```
+
+#### Routing Push Notifications
+Just define `routeNotificationForApn` and/or `routeNotificationForFcm`/`routeNotificationForGcm` methods on the entity
+```php
+/**
+ * Route notifications for the Apn channel.
+ *
+ * @return string|array
+ */
+public function routeNotificationForApn()
+{
+    return $this->ios_push_token;
+}
+```
