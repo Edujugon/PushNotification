@@ -6,6 +6,8 @@ use Edujugon\PushNotification\Contracts\PushServiceInterface;
 class Apn extends PushService implements PushServiceInterface
 {
 
+    const MAX_ATTEMPTS = 3;
+
     /**
      * Url for development purposes
      *
@@ -40,6 +42,16 @@ class Apn extends PushService implements PushServiceInterface
     private $feedbackUrl;
 
     /**
+     * The number of attempts to re-try before failing.
+     * Set to zero for unlimited attempts.
+     *
+     * @var int
+     */
+    private $maxAttempts = self::MAX_ATTEMPTS;
+
+    private $attempts = 0;
+
+    /**
      * Apn constructor.
      */
     public function __construct()
@@ -63,7 +75,7 @@ class Apn extends PushService implements PushServiceInterface
         parent::setConfig($config);
 
         $this->setProperGateway();
-
+        $this->setRetryAttemptsIfConfigured();
     }
 
     /**
@@ -84,6 +96,45 @@ class Apn extends PushService implements PushServiceInterface
                 $this->feedbackUrl = $this->feedbackProductionUrl;
             }
         }
+    }
+
+    /**
+     * Configure re-try attempts.
+     *
+     * @return void
+     */
+    private function setRetryAttemptsIfConfigured()
+    {
+        if (isset($this->config['connection_attempts']) &&
+            is_numeric($this->config['connection_attempts']))
+        {
+            $this->maxAttempts = $this->config['connection_attempts'];
+        }
+    }
+
+    /**
+     * Determines whether the connection attempts should be unlimited.
+     *
+     * @retorn bool
+     */
+    private function isUnlimitedAttempts()
+    {
+        return $this->maxAttempts == 0;
+    }
+
+    private function canRetry()
+    {
+        if ($this->isUnlimitedAttempts())
+            return true;
+
+        $this->attempts++;
+        return $this->attempts < $this->maxAttempts;
+    }
+
+    private function resetAttempts()
+    {
+        $this->attempts = 0;
+        return $this;
     }
 
     /**
@@ -183,7 +234,13 @@ class Apn extends PushService implements PushServiceInterface
                 $errstr, 60, STREAM_CLIENT_CONNECT|STREAM_CLIENT_PERSISTENT, $ctx);
         }catch (\Exception $e){
             //if stream socket can't be established, try again
-            return $this->openConnectionAPNS($ctx);
+            if ($this->canRetry())
+                return $this->openConnectionAPNS($ctx);
+
+            $response = ['success' => false, 'error' => 'Connection problem: ' . $e->getMessage() . PHP_EOL];
+            $this->setFeedback(json_decode(json_encode($response), FALSE));
+
+            return false;
         }
 
         stream_set_blocking ($fp, 0);
@@ -196,6 +253,8 @@ class Apn extends PushService implements PushServiceInterface
 
             return false;
         }
+
+        $this->resetAttempts();
         return $fp;
     }
 
@@ -301,7 +360,13 @@ class Apn extends PushService implements PushServiceInterface
             $apns = stream_socket_client($this->feedbackUrl, $errcode, $errstr, 60, STREAM_CLIENT_CONNECT, $ctx);
         }catch (\Exception $e){
             //if stream socket can't be established, try again
-            return $this->apnsFeedback();
+            if ($this->canRetry())
+                return $this->apnsFeedback();
+
+            $response = ['success' => false, 'error' => 'APNS feedback connection problem: ' . $e->getMessage() . PHP_EOL];
+            $this->setFeedback(json_decode(json_encode($response), FALSE));
+
+            return false;
         }
 
         //Read the data on the connection:
@@ -313,6 +378,7 @@ class Apn extends PushService implements PushServiceInterface
         }
         fclose($apns);
 
+        $this->resetAttempts();
         return $feedback_tokens;
 
     }
