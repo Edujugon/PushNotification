@@ -317,4 +317,67 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
 
         $this->assertInstanceOf('stdClass',$response);
     }
+
+    public function apn_connection_attempts_default() {
+        $push = new PushNotification('apn');
+
+        $push->setConfig(['dry_run' => true]);
+
+        $key = 'connection_attempts';
+        $this->assertArrayNotHasKey($key, $push->config);
+    }
+
+    /** @test */
+    public function set_apn_connect_attempts_override_default() {
+        $push = new PushNotification('apn');
+
+        $expected = 0;
+        $push->setConfig([
+            'dry_run' => true,
+            'connection_attempts' => $expected,
+        ]);
+
+        $key = 'connection_attempts';
+        $this->assertArrayHasKey($key, $push->config);
+        $this->assertEquals($expected, $push->config[$key]);
+    }
+
+    /** @test */
+    public function apn_connect_attempts_bailout_badcert() {
+        $push = new PushNotification('apn');
+
+        $tmp_name = tempnam(sys_get_temp_dir(), 'apn-tmp');
+        $fh = fopen($tmp_name, 'w');
+        fwrite($fh, 'badcert');
+        fclose($fh);
+
+        $expected = 0;
+
+        // ZZZ: intentional failure use-case so let's not
+        // waste time attemping to push with a bad cert.
+        $push->setConfig([
+            'dry_run' => true,
+            'connection_attempts' => 1,
+            'certificate' => $tmp_name,
+        ]);
+
+        $message = [
+            'aps' => [
+                'alert' => [
+                    'title' => '1 Notification test',
+                    'body' => 'Just for testing purposes'
+                ],
+                'sound' => 'default'
+            ]
+        ];
+
+        $push->setMessage($message)
+            ->setDevicesToken(['507e3adaf433ae3e6234f35c82f8a43ad0d84218bff08f16ea7be0869f066c0312']);
+
+        $push = $push->send();
+        $this->assertInstanceOf('stdClass', $push->getFeedback());
+
+        unlink($tmp_name);
+    }
+
 }

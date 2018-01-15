@@ -84,6 +84,7 @@ The default configuration parameters for **APN** are:
 *   ```passFile => __DIR__ . '/iosCertificates/yourKey.pem' //Optional```
 *   ```dry_run => false```
 
+
 Also you can update those values and add more dynamically
 
     $push->setConfig([
@@ -97,6 +98,21 @@ Even you may update the url of the Push Service dynamically like follows:
     $puhs->setUrl('http://newPushServiceUrl.com');
 
 > Not update the url unless it's really necessary.
+
+You can specify the number of client-side attempts to APN before giving
+up.  The default amount is 3 attempts.  You can override this value by
+specifying `connection_attempts` in `setConfig()` assoc-array.  Keep in
+mind the default number of requested attempts is 3.
+
+If you prefer to retry indefinitely, set `connection_attempts` to zero.
+
+    $push->setConfig([
+        'passPhrase' => 'NewPass',
+        'custom' => 'MycustomValue',
+        'connection_attempts' => 0,
+        'dry_run' => true
+    ]);
+
 
 ## Usage
 
