@@ -115,13 +115,18 @@ class Apn extends PushService implements PushServiceInterface
     /**
      * Determines whether the connection attempts should be unlimited.
      *
-     * @retorn bool
+     * @return bool
      */
     private function isUnlimitedAttempts()
     {
         return $this->maxAttempts == 0;
     }
 
+    /**
+     * Check if can retry a connection
+     *
+     * @return bool
+     */
     private function canRetry()
     {
         if ($this->isUnlimitedAttempts())
@@ -131,6 +136,11 @@ class Apn extends PushService implements PushServiceInterface
         return $this->attempts < $this->maxAttempts;
     }
 
+    /**
+     * Reset connection attempts
+     *
+     * @return $this
+     */
     private function resetAttempts()
     {
         $this->attempts = 0;
@@ -226,12 +236,24 @@ class Apn extends PushService implements PushServiceInterface
      */
     private function openConnectionAPNS($ctx)
     {
+        $fp = false;
 
         // Open a connection to the APNS server
         try{
             $fp = stream_socket_client(
                 $this->url, $err,
                 $errstr, 60, STREAM_CLIENT_CONNECT|STREAM_CLIENT_PERSISTENT, $ctx);
+
+            stream_set_blocking ($fp, 0);
+
+            if (!$fp)
+            {
+                $response = ['success' => false, 'error' => "Failed to connect: $err $errstr" . PHP_EOL];
+
+                $this->setFeedback(json_decode(json_encode($response), FALSE));
+
+            }
+
         }catch (\Exception $e){
             //if stream socket can't be established, try again
             if ($this->canRetry())
@@ -240,22 +262,10 @@ class Apn extends PushService implements PushServiceInterface
             $response = ['success' => false, 'error' => 'Connection problem: ' . $e->getMessage() . PHP_EOL];
             $this->setFeedback(json_decode(json_encode($response), FALSE));
 
-            return false;
+        }finally {
+            $this->resetAttempts();
+            return $fp;
         }
-
-        stream_set_blocking ($fp, 0);
-
-        if (!$fp)
-        {
-            $response = ['success' => false, 'error' => "Failed to connect: $err $errstr" . PHP_EOL];
-
-            $this->setFeedback(json_decode(json_encode($response), FALSE));
-
-            return false;
-        }
-
-        $this->resetAttempts();
-        return $fp;
     }
 
     /**
@@ -358,6 +368,16 @@ class Apn extends PushService implements PushServiceInterface
         // Open a connection to the APNS server
         try{
             $apns = stream_socket_client($this->feedbackUrl, $errcode, $errstr, 60, STREAM_CLIENT_CONNECT, $ctx);
+
+            //Read the data on the connection:
+            while(!feof($apns)) {
+                $data = fread($apns, 38);
+                if(strlen($data)) {
+                    $feedback_tokens['apnsFeedback'][] = unpack("N1timestamp/n1length/H*devtoken", $data);
+                }
+            }
+            fclose($apns);
+
         }catch (\Exception $e){
             //if stream socket can't be established, try again
             if ($this->canRetry())
@@ -366,20 +386,10 @@ class Apn extends PushService implements PushServiceInterface
             $response = ['success' => false, 'error' => 'APNS feedback connection problem: ' . $e->getMessage() . PHP_EOL];
             $this->setFeedback(json_decode(json_encode($response), FALSE));
 
-            return false;
+        }finally {
+            $this->resetAttempts();
+            return $feedback_tokens;
         }
-
-        //Read the data on the connection:
-        while(!feof($apns)) {
-            $data = fread($apns, 38);
-            if(strlen($data)) {
-                $feedback_tokens['apnsFeedback'][] = unpack("N1timestamp/n1length/H*devtoken", $data);
-            }
-        }
-        fclose($apns);
-
-        $this->resetAttempts();
-        return $feedback_tokens;
 
     }
 
