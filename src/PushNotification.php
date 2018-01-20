@@ -167,6 +167,19 @@ class PushNotification
     }
 
     /**
+     * @param $topic
+     * @param $isCondition
+     * @return $this
+     */
+    public function sendByTopic($topic, $isCondition = false)
+    {
+      if($this->service instanceof Fcm)
+          $this->service->sendByTopic($topic, $this->message, $isCondition);
+
+      return $this;
+    }
+
+    /**
      * Return property if exit here or in service object, otherwise null.
      *
      * @param $property
