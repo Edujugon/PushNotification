@@ -104,6 +104,21 @@ $push->setUrl('http://newPushServiceUrl.com');
 
 > Not update the url unless it's really necessary.
 
+You can specify the number of client-side attempts to APN before giving
+up.  The default amount is 3 attempts.  You can override this value by
+specifying `connection_attempts` in `setConfig()` assoc-array.  Keep in
+mind the default number of requested attempts is 3.
+
+If you prefer to retry indefinitely, set `connection_attempts` to zero.
+
+    $push->setConfig([
+        'passPhrase' => 'NewPass',
+        'custom' => 'MycustomValue',
+        'connection_attempts' => 0,
+        'dry_run' => true
+    ]);
+
+
 ## Usage
 ```php
 $push = new PushNotification;
