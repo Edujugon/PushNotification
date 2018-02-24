@@ -552,6 +552,15 @@ public function toApn($notifiable)
 }
 ```
 
+#### Add it to the notification channels
+```php
+public function via($notifiable)
+{
+    return [ApnChannel::class];
+}
+```
+>Don't forget the use statement at the top of the class
+
 #### Routing Push Notifications
 Just define `routeNotificationForApn` and/or `routeNotificationForFcm`/`routeNotificationForGcm` methods on the entity
 ```php
