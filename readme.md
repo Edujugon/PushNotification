@@ -302,7 +302,8 @@ $push->setMessage([
             ],
             'extraPayLoad' => [
                 'custom' => 'My custom data',
-            ]
+            ],
+            'badge' => 1
         ])
     ->setDevicesToken(['deviceToken1','deviceToken2','deviceToken3'...]);
 ```
