@@ -63,7 +63,7 @@ php artisan vendor:publish --provider="Edujugon\PushNotification\Providers\PushN
 
 ### Configuration
 
-The default configuration for all Push service providers is located in Config/config.php
+After publishing the configuration, all the Push service config details are located in config/pushnotification.php
 
 The default configuration parameters for **GCM** and **FCM** are :
 
