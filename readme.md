@@ -297,7 +297,8 @@ $push->setMessage([
                     'title' => 'This is the title',
                     'body' => 'This is the body'
                 ],
-                'sound' => 'default'
+                'sound' => 'default',
+                'badge' => 1
 
             ],
             'extraPayLoad' => [
