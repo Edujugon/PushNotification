@@ -88,6 +88,8 @@ The default configuration parameters for **APN** are:
 *   ```passFile => __DIR__ . '/iosCertificates/yourKey.pem' //Optional```
 *   ```dry_run => false```
 
+(Make sure to set `dry_run` to `true` if you're using development *.pem certificate, and `false` for production)
+
 Also you can update those values and add more dynamically
 ```php
 $push->setConfig([
