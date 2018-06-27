@@ -545,6 +545,16 @@ public function toApn($notifiable)
 }
 ```
 
+#### Customizing The Badge Number
+```php
+public function toApn($notifiable)
+{
+  return (new PushMessage)
+        ->body('Hello world')
+        ->sound('default')
+        ->badge(7);
+}
+
 #### Passing Service Config
 ```php
 public function toApn($notifiable)
