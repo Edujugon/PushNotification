@@ -26,6 +26,7 @@ class ApnChannel extends PushChannel
                     'body' => $message->body,
                 ],
                 'sound' => $message->sound,
+                'badge' => $message->badge,
             ],
         ];
 
