@@ -554,6 +554,7 @@ public function toApn($notifiable)
         ->sound('default')
         ->badge(7);
 }
+```
 
 #### Passing Service Config
 ```php
