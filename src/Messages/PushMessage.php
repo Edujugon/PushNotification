@@ -48,7 +48,7 @@ class PushMessage
     /**
      * Set the message body.
      *
-     * @param  string $title
+     * @param  string $body
      * @return $this
      */
     public function body($body)
@@ -75,7 +75,7 @@ class PushMessage
      * Set the notification sound.
      *
      * @param  string $sound
-     * @return void
+     * @return $this
      */
     public function sound($sound)
     {
@@ -88,7 +88,7 @@ class PushMessage
      * Set the notification badge.
      *
      * @param  integer $badge
-     * @return void
+     * @return $this
      */
     public function badge($badge)
     {
