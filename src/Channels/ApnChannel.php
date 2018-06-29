@@ -26,12 +26,15 @@ class ApnChannel extends PushChannel
                     'body' => $message->body,
                 ],
                 'sound' => $message->sound,
-                'badge' => $message->badge,
             ],
         ];
 
         if (! empty($message->extra)) {
             $data['extraPayLoad'] = $message->extra;
+        }
+
+        if (is_numeric($message->badge)) {
+            $data['aps']['badge'] = $message->badge;
         }
 
         return $data;
