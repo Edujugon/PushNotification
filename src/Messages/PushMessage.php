@@ -20,6 +20,11 @@ class PushMessage
     public $sound = 'default';
 
     /**
+     * @var integer
+     */
+    public $badge;
+
+    /**
      * @var array
      */
     public $extra = [];
@@ -43,7 +48,7 @@ class PushMessage
     /**
      * Set the message body.
      *
-     * @param  string $title
+     * @param  string $body
      * @return $this
      */
     public function body($body)
@@ -70,11 +75,24 @@ class PushMessage
      * Set the notification sound.
      *
      * @param  string $sound
-     * @return void
+     * @return $this
      */
     public function sound($sound)
     {
         $this->sound = $sound;
+
+        return $this;
+    }
+
+    /**
+     * Set the notification badge.
+     *
+     * @param  integer $badge
+     * @return $this
+     */
+    public function badge($badge)
+    {
+        $this->badge = $badge;
 
         return $this;
     }
