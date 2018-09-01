@@ -1,7 +1,7 @@
 <?php
-
 namespace Edujugon\PushNotification;
 
+use Edujugon\PushNotification\Exceptions\PushNotificationException;
 
 abstract class PushService
 {
@@ -54,24 +54,24 @@ abstract class PushService
 
     /**
      * Initialize the configuration for the chosen push service // gcm,etc..
-     * Check if config_path exist as function 
-     * 
+     *
      * @param $service
+     *
+     * @throws PushNotificationException
+     *
      * @return mixed
      */
     public function initializeConfig($service)
     {
-        if(function_exists('config_path'))
-        {
-            if(file_exists(config_path('pushnotification.php')))
-            {
-                $configuration = include(config_path('pushnotification.php'));
-                return $configuration[$service];
-            }
+        if (function_exists('config_path') && file_exists(config_path('pushnotification.php'))) {
+            $configuration = include(config_path('pushnotification.php'));
+        } else {
+            $configuration = include(__DIR__ . '/Config/config.php');
         }
 
-        $configuration = include(__DIR__ . '/Config/config.php');
-
+        if (!array_key_exists($service, $configuration)) {
+            throw new PushNotificationException("Service '$service' missed in config/pushnotification.php");
+        }
         return $configuration[$service];
     }
 
