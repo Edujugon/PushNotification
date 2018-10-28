@@ -29,8 +29,7 @@ class PushNotificationServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton('edujugonPushNotification',function($app)
-        {
+        $this->app->singleton('edujugonPushNotification', function ($app) {
             return new PushNotification();
         });
     }

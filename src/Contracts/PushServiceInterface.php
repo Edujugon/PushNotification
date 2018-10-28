@@ -1,18 +1,16 @@
 <?php
-
 namespace Edujugon\PushNotification\Contracts;
-
 
 interface PushServiceInterface
 {
 
     /**
      * Set the url to connect with the Push service provider.
-     * 
+     *
      * @param $url
      * @return mixed
      */
-    function setUrl($url);
+    public function setUrl($url);
 
     /**
      * Set the Push service provider configuration.
@@ -20,7 +18,7 @@ interface PushServiceInterface
      * @param array $config
      * @return mixed
      */
-    function setConfig(array $config);
+    public function setConfig(array $config);
 
     /**
      * Set the Push Notification Response.
@@ -28,7 +26,7 @@ interface PushServiceInterface
      * @param $feedback
      * @return mixed
      */
-    function setFeedback($feedback);
+    public function setFeedback($feedback);
 
     /**
      * Send the notification
@@ -37,7 +35,7 @@ interface PushServiceInterface
      * @param array $message
      * @return mixed
      */
-    function send(array $deviceTokens, array $message);
+    public function send(array $deviceTokens, array $message);
 
     /**
      * Retrieve the device tokes that couldn't receive the message from the push notification.
@@ -45,6 +43,6 @@ interface PushServiceInterface
      * @param array $devices_token
      * @return mixed
      */
-    function getUnregisteredDeviceTokens(array $devices_token);
+    public function getUnregisteredDeviceTokens(array $devices_token);
 
 }
