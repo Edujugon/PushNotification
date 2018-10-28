@@ -14,7 +14,7 @@ abstract class PushService
     protected $url = '';
 
     /**
-     * Confing details
+     * Config details
      * By default priority is set to high and dry_run to false
      *
      * @var array
@@ -49,7 +49,7 @@ abstract class PushService
      */
     public function setConfig(array $config)
     {
-        $this->config = array_replace($this->config,$config);
+        $this->config = array_replace($this->config, $config);
     }
 
     /**
@@ -94,8 +94,9 @@ abstract class PushService
      * @param $property
      * @return mixed|null
      */
-    public function __get($property){
-        return property_exists($this,$property) ? $this->$property : null;
+    public function __get($property)
+    {
+        return property_exists($this, $property) ? $this->$property : null;
     }
 
 }

@@ -1,5 +1,4 @@
 <?php
-
 namespace Edujugon\PushNotification\Channels;
 
 use Edujugon\PushNotification\Events\NotificationPushed;

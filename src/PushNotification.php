@@ -1,7 +1,6 @@
 <?php
 namespace Edujugon\PushNotification;
 
-
 class PushNotification
 {
 
@@ -49,23 +48,26 @@ class PushNotification
      */
     public function __construct($service = null)
     {
-        if(!array_key_exists($service,$this->servicesList)) $service = $this->defaultServiceName;
+        if (!array_key_exists($service, $this->servicesList)) {
+            $service = $this->defaultServiceName;
+        }
         
         $this->service = is_null($service) ? new $this->servicesList[$this->defaultServiceName]
                                             : new $this->servicesList[$service];
-
     }
 
     /**
      * Set the Push Service to be used.
-     * 
+     *
      * @param $serviceName
      * @return $this
      */
-    public function setService($serviceName){
+    public function setService($serviceName)
+    {
+        if (!array_key_exists($serviceName, $this->servicesList)) {
+            $serviceName = $this->defaultServiceName;
+        }
 
-        if(!array_key_exists($serviceName,$this->servicesList)) $serviceName = $this->defaultServiceName;
-        
         $this->service = new $this->servicesList[$serviceName];
 
         return $this;
@@ -103,7 +105,9 @@ class PushNotification
     public function setApiKey($api_key)
     {
         // if apn doesn't do anything
-        if(!$this->service instanceof Apn) $this->service->setApiKey($api_key) ;
+        if (!$this->service instanceof Apn) {
+            $this->service->setApiKey($api_key);
+        }
 
         return $this;
     }
@@ -135,7 +139,7 @@ class PushNotification
 
     /**
      *Get the unregistered tokens of the notification sent.
-     * 
+     *
      * @return array $tokenUnRegistered
      */
     public function getUnregisteredDeviceTokens()
@@ -145,7 +149,7 @@ class PushNotification
 
     /**
      * Give the Push Notification Feedback after sending a notification.
-     * 
+     *
      * @return mixed
      */
     public function getFeedback()
@@ -158,12 +162,11 @@ class PushNotification
      *
      * @return $this
      */
-    public function send(){
-
-        $this->service->send($this->deviceTokens,$this->message);
+    public function send()
+    {
+        $this->service->send($this->deviceTokens, $this->message);
 
         return $this;
-
     }
 
     /**
@@ -173,10 +176,11 @@ class PushNotification
      */
     public function sendByTopic($topic, $isCondition = false)
     {
-      if($this->service instanceof Fcm)
-          $this->service->sendByTopic($topic, $this->message, $isCondition);
+        if ($this->service instanceof Fcm) {
+            $this->service->sendByTopic($topic, $this->message, $isCondition);
+        }
 
-      return $this;
+        return $this;
     }
 
     /**
@@ -185,19 +189,16 @@ class PushNotification
      * @param $property
      * @return mixed / null
      */
-    public function __get($property){
-
-        if(property_exists($this,$property))
-        {
+    public function __get($property)
+    {
+        if (property_exists($this, $property)) {
             return $this->$property;
         }
 
-        if(property_exists($this->service,$property))
-        {
+        if (property_exists($this->service, $property)) {
             return $this->service->$property;
         }
 
         return null;
-
     }
 }
