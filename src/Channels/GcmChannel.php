@@ -20,7 +20,7 @@ class GcmChannel extends PushChannel
     protected function buildData(PushMessage $message)
     {
         $data = [];
-        if($message->title != null || $message->body != null || $message->click_action)
+        if($message->title != null || $message->body != null || $message->click_action != null)
         {
             $data = [
                 'notification' => [
