@@ -5,6 +5,7 @@ use Edujugon\PushNotification\Events\NotificationPushed;
 use Edujugon\PushNotification\Messages\PushMessage;
 use Edujugon\PushNotification\PushNotification;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
 
 abstract class PushChannel
 {
@@ -39,6 +40,8 @@ abstract class PushChannel
         $message = $this->buildMessage($notifiable, $notification);
 
         $data = $this->buildData($message);
+
+        Log::info($message);
 
         $this->push($this->pushServiceName(), $to, $data, $message);
     }
