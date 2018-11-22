@@ -20,6 +20,16 @@ class PushMessage
     public $sound = 'default';
 
     /**
+     * @var string
+     */
+    public $click_action;
+
+    /**
+     * @var string
+     */
+    public $category;
+
+    /**
      * @var integer
      */
     public $badge;
@@ -80,6 +90,32 @@ class PushMessage
     public function sound($sound)
     {
         $this->sound = $sound;
+
+        return $this;
+    }
+
+    /**
+     * The action associated with a user click on the notification.(Android) 
+     *
+     * @param  string $click_action
+     * @return $this
+     */
+    public function clickAction($click_action)
+    {
+        $this->click_action = $click_action;
+        
+        return $this;
+    }
+
+    /**
+     * The action associated with a user click on the notification.(iOS) 
+     *
+     * @param  string $click_action
+     * @return $this
+     */
+    public function category($category)
+    {
+        $this->category = $category;
 
         return $this;
     }
