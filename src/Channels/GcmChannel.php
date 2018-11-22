@@ -3,7 +3,6 @@
 namespace Edujugon\PushNotification\Channels;
 
 use Edujugon\PushNotification\Messages\PushMessage;
-use Illuminate\Support\Facades\Log;
 
 class GcmChannel extends PushChannel
 {
@@ -21,7 +20,7 @@ class GcmChannel extends PushChannel
     protected function buildData(PushMessage $message)
     {
         $data = [];
-        if($message->title != null || $message->body != null || $message->sound != null || $message->click_action)
+        if($message->title != null || $message->body != null || $message->click_action)
         {
             $data = [
                 'notification' => [
@@ -36,8 +35,6 @@ class GcmChannel extends PushChannel
         if (! empty($message->extra)) {
             $data['data'] = $message->extra;
         }
-
-        Log::alert(dd($data));
 
         return $data;
     }
