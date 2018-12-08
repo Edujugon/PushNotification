@@ -63,8 +63,11 @@ abstract class PushService
      */
     public function initializeConfig($service)
     {
-        if (function_exists('config_path') && file_exists(config_path('pushnotification.php'))) {
-            $configuration = include(config_path('pushnotification.php'));
+        if (function_exists('config_path') &&
+            file_exists(config_path('pushnotification.php')) &&
+            function_exists('app')
+        ) {
+            $configuration = app('config')->get('pushnotification');
         } else {
             $configuration = include(__DIR__ . '/Config/config.php');
         }
