@@ -153,8 +153,13 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
     public function fcm_assert_send_method_returns_an_stdClass_instance()
     {
         $push = new PushNotification('fcm');
-
-        $push->setMessage(['message'=>'Hello World'])
+          $message = [
+                    'notification'=> [
+                  'title'=>"Title of your notification",
+                  'body'=>"content of your notification"
+              ]
+        ];
+        $push->setMessage($message)
             ->setApiKey('asdfasdffasdfasdfasdf')
             ->setDevicesToken(['asdfasefaefwefwerwerwer'])
             ->setConfig(['dry_run' => false]);
@@ -197,8 +202,13 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
     public function get_feedback_after_sending_a_notification()
     {
         $push = new PushNotification('fcm');
-
-        $response = $push->setMessage(['message'=>'Hello World'])
+          $message = [
+                    'notification'=> [
+                  'title'=>"Title of your notification",
+                  'body'=>"content of your notification"
+              ]
+        ];
+        $response = $push->setMessage($message)
             ->setApiKey('asdfasdffasdfasdfasdf')
             ->setDevicesToken(['asdfasefaefwefwerwerwer'])
             ->setConfig(['dry_run' => false])
