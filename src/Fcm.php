@@ -44,7 +44,7 @@ class Fcm extends Gcm
 
             $json = $result->getBody();
 
-            $this->setFeedback(json_decode($json));
+            $this->setFeedback(json_decode($json, false, 512, JSON_BIGINT_AS_STRING));
 
         } catch (\Exception $e) {
             $response = ['success' => false, 'error' => $e->getMessage()];
