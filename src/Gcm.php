@@ -150,7 +150,7 @@ class Gcm extends PushService implements PushServiceInterface
 
             $json = $result->getBody();
 
-            $this->setFeedback(json_decode($json , false , 512 , JSON_BIGINT_AS_STRING));
+            $this->setFeedback(json_decode($json, false, 512, JSON_BIGINT_AS_STRING));
 
             return $this->feedback;
 
