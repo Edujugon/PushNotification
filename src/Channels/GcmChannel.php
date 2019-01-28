@@ -29,6 +29,11 @@ class GcmChannel extends PushChannel
                     'click_action' => $message->click_action,
                 ],
             ];
+
+            // Set custom badge number when isset in PushMessage
+            if (! empty($message->badge)) {
+                $data['notification']['badge'] = $message->badge;
+            }
         }
 
         if (! empty($message->extra)) {
