@@ -25,7 +25,6 @@ class GcmChannel extends PushChannel
                 'notification' => [
                     'title' => $message->title,
                     'body' => $message->body,
-                    'icon' => $message->icon,
                     'sound' => $message->sound,
                     'click_action' => $message->click_action,
                 ],
@@ -34,6 +33,11 @@ class GcmChannel extends PushChannel
             // Set custom badge number when isset in PushMessage
             if (! empty($message->badge)) {
                 $data['notification']['badge'] = $message->badge;
+            }
+
+            // Set icon when isset in PushMessage
+            if (! empty($message->icon)) {
+                $data['notification']['icon'] = $message->icon;
             }
         }
 
