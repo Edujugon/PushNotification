@@ -17,6 +17,11 @@ class PushMessage
     /**
      * @var string
      */
+    public $icon;
+
+    /**
+     * @var string
+     */
     public $sound = 'default';
 
     /**
@@ -77,6 +82,19 @@ class PushMessage
     public function title($title)
     {
         $this->title = $title;
+
+        return $this;
+    }
+
+    /**
+     * Set the message icon.
+     *
+     * @param  string $icon
+     * @return $this
+     */
+    public function icon($icon)
+    {
+        $this->icon = $icon;
 
         return $this;
     }

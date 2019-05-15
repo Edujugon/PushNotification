@@ -34,6 +34,11 @@ class GcmChannel extends PushChannel
             if (! empty($message->badge)) {
                 $data['notification']['badge'] = $message->badge;
             }
+
+            // Set icon when isset in PushMessage
+            if (! empty($message->icon)) {
+                $data['notification']['icon'] = $message->icon;
+            }
         }
 
         if (! empty($message->extra)) {
