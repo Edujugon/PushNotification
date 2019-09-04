@@ -2,6 +2,7 @@
 
 
 use Edujugon\PushNotification\PushNotification;
+use Illuminate\Support\Arr;
 
 class PushNotificationTest extends PHPUnit_Framework_TestCase {
 
@@ -283,7 +284,7 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
             $tokens =  $obj->tokenFailList;
         }
         if (!empty($obj->apnsFeedback)) {
-            $tokens = array_merge($tokens, array_pluck($obj->apnsFeedback, 'devtoken'));
+            $tokens = array_merge($tokens, Arr::pluck($obj->apnsFeedback, 'devtoken'));
         }
 
         //var_dump($tokens);
