@@ -1,10 +1,11 @@
 <?php
 
 
+use PHPUnit\Framework\TestCase;
 use Edujugon\PushNotification\PushNotification;
 use Illuminate\Support\Arr;
 
-class PushNotificationTest extends PHPUnit_Framework_TestCase {
+class PushNotificationTest extends TestCase {
 
     /** @test */
     public function push_notification_instance_creation_without_argument_set_gcm_as_service()
@@ -57,7 +58,7 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
             ->setMessage(['message' =>'hello world'])
             ->send();
 
-        $this->assertInternalType('array', $push->getUnregisteredDeviceTokens());
+        $this->assertIsArray($push->getUnregisteredDeviceTokens());
     }
 
     /** @test */
@@ -71,7 +72,7 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
 
         $this->assertArrayHasKey('time_to_live', $push->config);
         $this->assertArrayHasKey('priority', $push->config); //default key
-        $this->assertInternalType('array', $push->config);
+        $this->assertIsArray($push->config);
 
         /** APNS */
         $pushAPN = new PushNotification('apn');
@@ -80,7 +81,7 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
 
         $this->assertArrayHasKey('time_to_live', $pushAPN->config);
         $this->assertArrayHasKey('certificate', $pushAPN->config); //default key
-        $this->assertInternalType('array', $pushAPN->config);
+        $this->assertIsArray($pushAPN->config);
     }
 
     /** @test */
@@ -121,7 +122,7 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
         $push = $push->send();
         //var_dump($push->getFeedback());
         $this->assertInstanceOf('stdClass', $push->getFeedback());
-        $this->assertInternalType('array', $push->getUnregisteredDeviceTokens());
+        $this->assertIsArray($push->getUnregisteredDeviceTokens());
     }
 
     /** @test */
@@ -180,7 +181,7 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
         $push = new PushNotification();
 
         $this->assertCount(3, $push->servicesList);
-        $this->assertInternalType('array', $push->servicesList);
+        $this->assertIsArray($push->servicesList);
     }
 
     /** @test */
@@ -232,7 +233,7 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
 
         $push->send();
         $this->assertInstanceOf('stdClass', $push->getFeedback());
-        $this->assertInternalType('array', $push->getUnregisteredDeviceTokens());
+        $this->assertIsArray($push->getUnregisteredDeviceTokens());
     }
 
 
@@ -287,7 +288,7 @@ class PushNotificationTest extends PHPUnit_Framework_TestCase {
             $tokens = array_merge($tokens, Arr::pluck($obj->apnsFeedback, 'devtoken'));
         }
 
-        //var_dump($tokens);
+        $this->assertTrue(true);
     }
 
     public function send_a_notification_by_topic_in_fcm()
