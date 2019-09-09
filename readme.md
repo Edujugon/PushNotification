@@ -12,19 +12,18 @@ This is an easy to use package to send push notification.
 * GCM
 * FCM
 * APN
-* More Push Service Providers coming soon.
 
 ## Installation
 
-### Laravel 5.0 - 5.1
+### Laravel version below 5.8
 
 type in console:
 
 ```
-composer require edujugon/push-notification:dev-laravel-5
+composer require "edujugon/push-notification:^v3.0.0"
 ```
 
-### Laravel 5.2 and higher
+### Laravel 5.8/6 and higher
 
 type in console:
 
@@ -32,27 +31,7 @@ type in console:
 composer require edujugon/push-notification
 ```
 
-## Laravel 5.*
-
-**Laravel 5.5 or higher?**
-
-Then you don't have to either register or add the alias, this package uses Package Auto-Discovery's feature, and should be available as soon as you install it via Composer.
-
-(Laravel < 5.5) Register the PushNotification service by adding it to the providers array.
-```php
-'providers' => array(
-    ...
-    Edujugon\PushNotification\Providers\PushNotificationServiceProvider::class
-)
-```
-
-(Laravel < 5.5) Let's add the Alias facade, add it to the aliases array.
-```php
-'aliases' => array(
-    ...
-    'PushNotification' => Edujugon\PushNotification\Facades\PushNotification::class,
-)
-```
+The package will automatically register its service provider.
 
 Publish the package's configuration file to the application's own config directory
 ```
@@ -63,7 +42,7 @@ php artisan vendor:publish --provider="Edujugon\PushNotification\Providers\PushN
 
 ### Configuration
 
-After publishing the configuration, all the Push service config details are located in config/pushnotification.php
+After publishing the configuration, you can find the Push service config in config/pushnotification.php
 
 The default configuration parameters for **GCM** and **FCM** are :
 
@@ -138,7 +117,7 @@ For FCM Service:
 $push = new PushNotification('fcm');
 ```
 
-Now you may use any method what you need. Please see the API List.
+Now you may use any method that you need. Please see the API List.
 
 
 ## API List
@@ -164,7 +143,7 @@ Now you may use any method what you need. Please see the API List.
 
 #### setService
 
-`setService` method sets the push service to be used, which you pass the name through parameter as string.
+`setService` method sets the push service to be used, which you pass the name through parameter as a string.
 
 **Syntax**
 
@@ -174,7 +153,7 @@ object setService($name)
 
 #### setMessage
 
-`setMessage` method sets the message parameters, which you pass the values through parameter as array.
+`setMessage` method sets the message parameters, which you pass the values through parameter as an array.
 
 **Syntax**
 
@@ -186,7 +165,7 @@ object setMessage(array $data)
 
 > Only for gcm and fcm
 
-`setApiKey` method sets the API Key of your App, which you pass the key through parameter as string.
+`setApiKey` method sets the API Key of your App, which you pass the key through parameter as a string.
 
 **Syntax**
 
@@ -260,7 +239,7 @@ object setUrl($url)
 
 > Only for fcm
 
-`sendBytopic` method sends a message by topic. It also accepts topic condition. more details [here](https://firebase.google.com/docs/cloud-messaging/android/topic-messaging)
+`sendBytopic` method sends a message by topic. It also accepts the topic condition. more details [here](https://firebase.google.com/docs/cloud-messaging/android/topic-messaging)
 >If isCondition is true, $topic will be treated as an expression
 
 **Syntax**
@@ -406,7 +385,7 @@ $push->setMessage([
 
 #### Data Message
 
-By default this package sends the notification as Data Message. So no need to add a `data` key. Just leave it without main keys.
+By default, this package sends the notification as Data Message. So no need to add a `data` key.
 
 ```php
 $push->setMessage([

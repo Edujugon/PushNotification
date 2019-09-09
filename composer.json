@@ -1,6 +1,6 @@
 {
     "name": "edujugon/push-notification",
-    "description": "Laravel 5 Package to send push notifications to Android and IOS devices. (GCM,FCM,APN)",
+    "description": "Laravel Package to send push notifications to Android and IOS devices. (GCM,FCM,APN)",
     "keywords": ["Laravel","push","notification","gcm","apn","fcm","high","priority"],
     "license": "MIT",
     "authors": [
