@@ -2,6 +2,7 @@
 namespace Edujugon\PushNotification;
 
 use Edujugon\PushNotification\Contracts\PushServiceInterface;
+use Illuminate\Support\Arr;
 
 class Apn extends PushService implements PushServiceInterface
 {
@@ -162,7 +163,7 @@ class Apn extends PushService implements PushServiceInterface
             $tokens = $this->feedback->tokenFailList;
         }
         if (!empty($this->feedback->apnsFeedback)) {
-            $tokens = array_merge($tokens, array_pluck($this->feedback->apnsFeedback, 'devtoken'));
+            $tokens = array_merge($tokens, Arr::pluck($this->feedback->apnsFeedback, 'devtoken'));
         }
 
         return $tokens;
@@ -426,7 +427,7 @@ class Apn extends PushService implements PushServiceInterface
         $feedback['failure'] += count($apnsFeedback['apnsFeedback']);
 
         //apns tokens
-        $apnsTokens = array_pluck($apnsFeedback['apnsFeedback'], 'devtoken');
+        $apnsTokens = Arr::pluck($apnsFeedback['apnsFeedback'], 'devtoken');
 
         foreach ($deviceTokens as $token) {
             if (in_array($token, $apnsTokens)) {
