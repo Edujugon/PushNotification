@@ -2,8 +2,19 @@ language: php
 
 php:
   - 7.2
+  - 7.3
+
+# faster builds on new travis setup not using sudo
+sudo: false
+
+# cache vendor dirs
+cache:
+  directories:
+    - $HOME/.composer/cache
 
 before_script:
-  - composer self-update
-  - composer install
-script: vendor/bin/phpunit
+  - travis_retry composer self-update
+  - travis_retry composer install --no-interaction
+
+script:
+  - vendor/bin/phpunit
