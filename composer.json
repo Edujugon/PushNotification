@@ -1,8 +1,12 @@
 {
     "name": "edujugon/push-notification",
     "description": "Laravel Package to send push notifications to Android and IOS devices. (GCM,FCM,APN)",
-    "keywords": ["Laravel","push","notification","gcm","apn","fcm","high","priority"],
+    "keywords": ["Laravel", "push", "notification", "gcm", "apn", "fcm", "high", "priority"],
     "license": "MIT",
+    "support": {
+        "issues": "https://github.com/Edujugon/PushNotification/issues",
+        "source": "https://github.com/Edujugon/PushNotification"
+    },
     "authors": [
         {
             "name": "Eduardo Marcos",
@@ -10,13 +14,13 @@
         }
     ],
     "require": {
-        "php" : "~7.1.3||^7.2",
+        "php" : "~7.1.3|^7.2",
         "guzzlehttp/guzzle": "^6.3",
-        "illuminate/support": "~5.8||^6.0",
-        "illuminate/notifications": "~5.8||^6.0"
+        "illuminate/support": "~5.8|^6.0",
+        "illuminate/notifications": "~5.8|^6.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^7.5||^8.0"
+        "phpunit/phpunit": "^7.5|^8.0"
     },
     "autoload": {
         "psr-4": {
