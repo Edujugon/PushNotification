@@ -32,6 +32,5 @@
                 "PushNotification": "Edujugon\\PushNotification\\Facades\\PushNotification"
             }
         }
-    },
-    "minimum-stability": "dev"
+    }
 }
