@@ -1,5 +1,14 @@
+# IDE
+.idea
+# OS
+.DS_Store
+Thumbs.db
+# Composer
 vendor/
 composer.lock
-.idea
+# local files
 src/Config/iosCertificates/
-.DS_Store
+# phpunit
+phpunit.phar
+phpunit.xml
+.phpunit.result.cache
