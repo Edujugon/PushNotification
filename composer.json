@@ -1,5 +1,5 @@
 {
-    "name": "fsf/edujugon/push-notification",
+    "name": "fsf/push-notification",
     "description": "Laravel Package to send push notifications to Android, IOS and Fire devices. (GCM,FCM,APN,ADM)",
     "keywords": ["Laravel", "push", "notification", "gcm", "apn", "fcm", "adm", "high", "priority"],
     "license": "MIT",
