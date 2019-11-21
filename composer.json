@@ -24,16 +24,16 @@
     },
     "autoload": {
         "psr-4": {
-            "Edujugon\\PushNotification\\": "src/"
+            "eyfs\\PushNotification\\": "src/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Edujugon\\PushNotification\\Providers\\PushNotificationServiceProvider"
+                "eyfs\\PushNotification\\Providers\\PushNotificationServiceProvider"
             ],
             "aliases": {
-                "PushNotification": "Edujugon\\PushNotification\\Facades\\PushNotification"
+                "PushNotification": "eyfs\\PushNotification\\Facades\\PushNotification"
             }
         }
     }
