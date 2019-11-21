@@ -1,11 +1,11 @@
 {
-    "name": "edujugon/push-notification",
-    "description": "Laravel Package to send push notifications to Android and IOS devices. (GCM,FCM,APN)",
-    "keywords": ["Laravel", "push", "notification", "gcm", "apn", "fcm", "high", "priority"],
+    "name": "fsf/edujugon/push-notification",
+    "description": "Laravel Package to send push notifications to Android, IOS and Fire devices. (GCM,FCM,APN,ADM)",
+    "keywords": ["Laravel", "push", "notification", "gcm", "apn", "fcm", "adm", "high", "priority"],
     "license": "MIT",
     "support": {
-        "issues": "https://github.com/Edujugon/PushNotification/issues",
-        "source": "https://github.com/Edujugon/PushNotification"
+        "issues": "https://github.com/eyfs/PushNotification/issues",
+        "source": "https://github.com/eyfs/PushNotification"
     },
     "authors": [
         {
