@@ -32,13 +32,13 @@ abstract class PushChannel
      */
     public function send($notifiable, Notification $notification)
     {
-        if (! $to = $notifiable->routeNotificationFor($this->notificationFor())) {
+        $message = $this->buildMessage($notifiable, $notification);
+        $data = $this->buildData($message);
+        $to = $message->to ?? $notifiable->routeNotificationFor($this->notificationFor());
+
+        if (! $to) {
             return;
         }
-
-        $message = $this->buildMessage($notifiable, $notification);
-
-        $data = $this->buildData($message);
 
         $this->push($this->pushServiceName(), $to, $data, $message);
     }
