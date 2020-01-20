@@ -174,7 +174,7 @@ class PushMessage
      * @param string $color
      * @return $this
      */
-    public function color($color = '')
+    public function color($color)
     {
         $this->color = $color;
 
