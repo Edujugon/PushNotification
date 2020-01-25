@@ -26,6 +26,7 @@ class GcmChannel extends PushChannel
                     'title' => $message->title,
                     'body' => $message->body,
                     'sound' => $message->sound,
+                    'color' => $message->color,
                     'click_action' => $message->click_action,
                 ],
             ];

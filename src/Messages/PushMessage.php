@@ -7,6 +7,11 @@ class PushMessage
     /**
      * @var string
      */
+    public $to;
+
+    /**
+     * @var string
+     */
     public $title;
 
     /**
@@ -50,6 +55,11 @@ class PushMessage
     public $config = [];
 
     /**
+     * @var string
+     */
+    public $color = '#000000';
+
+    /**
      * Create a new message instance.
      *
      * @param  string  $body
@@ -58,6 +68,13 @@ class PushMessage
     public function __construct($body = '')
     {
         $this->body = $body;
+    }
+
+    public function to($to)
+    {
+        $this->to = $to;
+
+        return $this;
     }
 
     /**
@@ -147,6 +164,19 @@ class PushMessage
     public function badge($badge)
     {
         $this->badge = $badge;
+
+        return $this;
+    }
+
+    /**
+     * Set notification icon color.
+     *
+     * @param string $color
+     * @return $this
+     */
+    public function color($color)
+    {
+        $this->color = $color;
 
         return $this;
     }
