@@ -27,6 +27,8 @@ class PushNotificationTest extends TestCase {
 
         $push = $push->send();
 
+        echo $push->getFeedback() === null ? 'yes' :'no';
+
         $this->assertInstanceOf('stdClass', $push->getFeedback());
 
     }
