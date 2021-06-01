@@ -145,6 +145,8 @@ class Gcm extends PushService implements PushServiceInterface
                 [
                     'headers' => $headers,
                     'json' => $fields,
+                    'connect_timeout' => 15,
+                    'timeout' => 60,
                 ]
             );
 

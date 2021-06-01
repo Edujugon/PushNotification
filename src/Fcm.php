@@ -39,6 +39,8 @@ class Fcm extends Gcm
                 [
                     'headers' => $headers,
                     'json' => $data,
+                    'connect_timeout' => 15,
+                    'timeout' => 60,
                 ]
             );
 
