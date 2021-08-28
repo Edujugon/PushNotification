@@ -1,4 +1,5 @@
 <?php
+
 namespace Edujugon\PushNotification;
 
 use Edujugon\PushNotification\Contracts\PushServiceInterface;
@@ -29,7 +30,7 @@ class Gcm extends PushService implements PushServiceInterface
     public function __construct()
     {
         $this->url = 'https://android.googleapis.com/gcm/send';
-        
+
         $this->config = $this->initializeConfig('gcm');
         $this->client = new Client;
     }
@@ -78,7 +79,7 @@ class Gcm extends PushService implements PushServiceInterface
 
         $message = $this->buildMessage($message);
 
-        return array_merge($params, $message, ['registration_ids'  => $deviceTokens]);
+        return array_merge($params, $message, ['registration_ids' => $deviceTokens]);
     }
 
     /**
@@ -121,14 +122,14 @@ class Gcm extends PushService implements PushServiceInterface
     {
         return [
             'Authorization' => 'key=' . $this->config['apiKey'],
-            'Content-Type:' =>'application/json'
+            'Content-Type' => 'application/json'
         ];
     }
 
     /**
      * Send Push Notification
      *
-     * @param  array $deviceTokens
+     * @param array $deviceTokens
      * @param array $message
      *
      * @return \stdClass  GCM Response
@@ -156,7 +157,7 @@ class Gcm extends PushService implements PushServiceInterface
 
         } catch (\Exception $e) {
             $response = ['success' => false, 'error' => $e->getMessage()];
-            
+
             $this->setFeedback(json_decode(json_encode($response)));
 
             return $this->feedback;
