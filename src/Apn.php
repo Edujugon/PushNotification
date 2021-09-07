@@ -160,7 +160,7 @@ class Apn extends PushService implements PushServiceInterface
                     continue;
                 }
 
-                $responseCollection['success'] = $responseCollection['success'] & $statusCode == 200;
+                $responseCollection['success'] = $responseCollection['success'] && $statusCode == 200;
 
                 $responseCollection['responses'][] = [
                     'status' => $statusCode,
