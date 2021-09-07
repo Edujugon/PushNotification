@@ -81,7 +81,11 @@ class Apn extends PushService implements PushServiceInterface
      */
     public function send(array $deviceTokens, array $message)
     {
-        $responseCollection = [];
+        $responseCollection = [
+            'success' => true,
+            'errors' => [],
+            'responses' => [],
+        ];
 
         if (!$this->curlMultiHandle) {
             $this->curlMultiHandle = curl_multi_init();
@@ -147,12 +151,18 @@ class Apn extends PushService implements PushServiceInterface
 
                 $statusCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
                 if ($statusCode === 0) {
-                    $errors[] = curl_error($handle);
+                    $responseCollection['errors'][] = [
+                        'status' => $statusCode,
+                        'headers' => $headers,
+                        'body' => curl_error($handle),
+                        'token' => $token
+                    ];
                     continue;
                 }
 
-                $responseCollection = [
-                    'success' => $statusCode == 200,
+                $responseCollection['success'] = $responseCollection['success'] & $statusCode == 200;
+
+                $responseCollection['responses'][] = [
                     'status' => $statusCode,
                     'headers' => $headers,
                     'body' => (string)$body,
