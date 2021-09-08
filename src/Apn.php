@@ -81,10 +81,14 @@ class Apn extends PushService implements PushServiceInterface
      */
     public function send(array $deviceTokens, array $message)
     {
+        if (false == $this->existCertificate()) {
+            return $this->feedback;
+        }
+
         $responseCollection = [
             'success' => true,
-            'errors' => [],
-            'responses' => [],
+            'error' => '',
+            'results' => [],
         ];
 
         if (!$this->curlMultiHandle) {
@@ -151,7 +155,9 @@ class Apn extends PushService implements PushServiceInterface
 
                 $statusCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
                 if ($statusCode === 0) {
-                    $responseCollection['errors'][] = [
+                    $responseCollection['success'] = false;
+
+                    $responseCollection['error'] = [
                         'status' => $statusCode,
                         'headers' => $headers,
                         'body' => curl_error($handle),
@@ -162,7 +168,7 @@ class Apn extends PushService implements PushServiceInterface
 
                 $responseCollection['success'] = $responseCollection['success'] && $statusCode == 200;
 
-                $responseCollection['responses'][] = [
+                $responseCollection['results'][] = [
                     'status' => $statusCode,
                     'headers' => $headers,
                     'body' => (string)$body,
@@ -278,6 +284,41 @@ class Apn extends PushService implements PushServiceInterface
         curl_setopt($ch, CURLOPT_PRIVATE, $deviceToken);
 
         return $ch;
+    }
+
+    /**
+     * Set the feedback with no exist any certificate.
+     *
+     * @return mixed|void
+     */
+    private function messageNoExistCertificate()
+    {
+        $response = [
+            'success' => false,
+            'error' => "Please, add your APN certificate to the iosCertificates folder." . PHP_EOL
+        ];
+
+        $this->setFeedback(json_decode(json_encode($response)));
+    }
+
+    /**
+     * Check if the certificate file exist.
+     * @return bool
+     */
+    private function existCertificate()
+    {
+        if (isset($this->config['certificate'])) {
+            $certificate = $this->config['certificate'];
+            if (!file_exists($certificate)) {
+                $this->messageNoExistCertificate();
+                return false;
+            }
+
+            return true;
+        }
+
+        $this->messageNoExistCertificate();
+        return false;
     }
 
 }

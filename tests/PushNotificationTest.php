@@ -137,21 +137,6 @@ class PushNotificationTest extends TestCase {
     }
 
     /** @test */
-    public function apn_dry_run_option_update_the_apn_url()
-    {
-        $push = new PushNotification('apn');
-
-        $push->setConfig(['dry_run'=>false]);
-
-        $this->assertEquals('ssl://gateway.push.apple.com:2195', $push->url);
-
-        $push->setConfig(['dry_run'=>true]);
-
-        $this->assertEquals('ssl://gateway.sandbox.push.apple.com:2195', $push->url);
-    }
-
-
-    /** @test */
     public function fcm_assert_send_method_returns_an_stdClass_instance()
     {
         $push = new PushNotification('fcm');
