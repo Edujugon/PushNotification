@@ -6,147 +6,51 @@ use Illuminate\Support\Arr;
 
 class Apn extends PushService implements PushServiceInterface
 {
-
-    const MAX_ATTEMPTS = 3;
-
-    /**
-     * Url for development purposes
-     *
-     * @var string
-     */
-    private $sandboxUrl = 'ssl://gateway.sandbox.push.apple.com:2195';
+    const APNS_DEVELOPMENT_SERVER = 'https://api.development.push.apple.com';
+    const APNS_PRODUCTION_SERVER = 'https://api.push.apple.com';
+    const APNS_PORT = 443;
+    const APNS_PATH_SCHEMA = '/3/device/{token}';
 
     /**
-     * Url for production
-     *
-     * @var string
-     */
-    private $productionUrl = 'ssl://gateway.push.apple.com:2195';
-
-    /**
-     * Feedback SandBox url
-     * @var string
-     */
-    private $feedbackSandboxUrl = 'ssl://feedback.sandbox.push.apple.com:2196';
-
-    /**
-     * Feedback Production url
-     * @var string
-     */
-    private $feedbackProductionUrl = 'ssl://feedback.push.apple.com:2196';
-
-    /**
-     *  It's dynamically filled based on the dry_run parameter.
-     *
-     * @var string
-     */
-    private $feedbackUrl;
-
-    /**
-     * The number of attempts to re-try before failing.
-     * Set to zero for unlimited attempts.
+     * Number of concurrent requests to multiplex in the same connection.
      *
      * @var int
      */
-    private $maxAttempts = self::MAX_ATTEMPTS;
+    private $nbConcurrentRequests = 20;
 
-    private $attempts = 0;
+    /**
+     * Number of maximum concurrent connections established to the APNS servers.
+     *
+     * @var int
+     */
+    private $maxConcurrentConnections = 1;
+
+    /**
+     * Flag to know if we should automatically close connections to the APNS servers or keep them alive.
+     *
+     * @var bool
+     */
+    private $autoCloseConnections = true;
+
+    /**
+     * Current curl_multi handle instance.
+     *
+     * @var resource
+     */
+    private $curlMultiHandle;
 
     /**
      * Apn constructor.
      */
     public function __construct()
     {
-        $this->url = $this->productionUrl;
+        if (!defined('CURL_HTTP_VERSION_2')) {
+            define('CURL_HTTP_VERSION_2', 3);
+        }
+
+        $this->url = self::APNS_PRODUCTION_SERVER;
 
         $this->config = $this->initializeConfig('apn');
-
-        $this->setProperGateway();
-    }
-
-    /**
-     * Call parent method.
-     * Check if there is dry_run parameter in config data. Set the service url according to the dry_run value.
-     *
-     * @param array $config
-     * @return void
-     */
-    public function setConfig(array $config)
-    {
-        parent::setConfig($config);
-
-        $this->setProperGateway();
-        $this->setRetryAttemptsIfConfigured();
-    }
-
-    /**
-     *Set the correct Gateway url and the Feedback url based on dry_run param.
-     *
-     * @return void
-     */
-    private function setProperGateway()
-    {
-        if (isset($this->config['dry_run'])) {
-            if ($this->config['dry_run']) {
-                $this->setUrl($this->sandboxUrl);
-                $this->feedbackUrl = $this->feedbackSandboxUrl;
-
-            } else {
-                $this->setUrl($this->productionUrl);
-                $this->feedbackUrl = $this->feedbackProductionUrl;
-            }
-        }
-    }
-
-    /**
-     * Configure re-try attempts.
-     *
-     * @return void
-     */
-    private function setRetryAttemptsIfConfigured()
-    {
-        if (isset($this->config['connection_attempts']) &&
-            is_numeric($this->config['connection_attempts'])) {
-            $this->maxAttempts = $this->config['connection_attempts'];
-        }
-    }
-
-    /**
-     * Determines whether the connection attempts should be unlimited.
-     *
-     * @return bool
-     */
-    private function isUnlimitedAttempts()
-    {
-        return $this->maxAttempts == 0;
-    }
-
-    /**
-     * Check if can retry a connection
-     *
-     * @return bool
-     */
-    private function canRetry()
-    {
-        if ($this->isUnlimitedAttempts()) {
-            return true;
-        }
-
-        $this->attempts++;
-
-        return $this->attempts < $this->maxAttempts;
-    }
-
-    /**
-     * Reset connection attempts
-     *
-     * @return $this
-     */
-    private function resetAttempts()
-    {
-        $this->attempts = 0;
-
-        return $this;
     }
 
     /**
@@ -167,6 +71,219 @@ class Apn extends PushService implements PushServiceInterface
         }
 
         return $tokens;
+    }
+
+    /**
+     * Send Push Notification
+     * @param  array $deviceTokens
+     * @param array $message
+     * @return \stdClass  APN Response
+     */
+    public function send(array $deviceTokens, array $message)
+    {
+        if (false == $this->existCertificate()) {
+            return $this->feedback;
+        }
+
+        $responseCollection = [
+            'success' => true,
+            'error' => '',
+            'results' => [],
+        ];
+
+        if (!$this->curlMultiHandle) {
+            $this->curlMultiHandle = curl_multi_init();
+
+            if (!defined('CURLPIPE_MULTIPLEX')) {
+                define('CURLPIPE_MULTIPLEX', 2);
+            }
+
+            curl_multi_setopt($this->curlMultiHandle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
+            if (defined('CURLMOPT_MAX_HOST_CONNECTIONS')) {
+                curl_multi_setopt($this->curlMultiHandle, CURLMOPT_MAX_HOST_CONNECTIONS, $this->maxConcurrentConnections);
+            }
+        }
+
+        $mh = $this->curlMultiHandle;
+        $errors = [];
+
+        $i = 0;
+        while (!empty($deviceTokens) && $i++ < $this->nbConcurrentRequests) {
+            $deviceToken = array_pop($deviceTokens);
+            curl_multi_add_handle($mh, $this->prepareHandle($deviceToken, $message));
+        }
+
+        // Clear out curl handle buffer
+        do {
+            $execrun = curl_multi_exec($mh, $running);
+        } while ($execrun === CURLM_CALL_MULTI_PERFORM);
+
+        // Continue processing while we have active curl handles
+        while ($running > 0 && $execrun === CURLM_OK) {
+            // Block until data is available
+            $select_fd = curl_multi_select($mh);
+            // If select returns -1 while running, wait 250 microseconds before continuing
+            // Using curl_multi_timeout would be better but it isn't available in PHP yet
+            // https://php.net/manual/en/function.curl-multi-select.php#115381
+            if ($running && $select_fd === -1) {
+                usleep(250);
+            }
+
+            // Continue to wait for more data if needed
+            do {
+                $execrun = curl_multi_exec($mh, $running);
+            } while ($execrun === CURLM_CALL_MULTI_PERFORM);
+
+            // Start reading results
+            while ($done = curl_multi_info_read($mh)) {
+                $handle = $done['handle'];
+
+                $result = curl_multi_getcontent($handle);
+
+                // find out which token the response is about
+                $token = curl_getinfo($handle, CURLINFO_PRIVATE);
+
+                $responseParts = explode("\r\n\r\n", $result, 2);
+                $headers = '';
+                $body = '';
+                if (isset($responseParts[0])) {
+                    $headers = $responseParts[0];
+                }
+                if (isset($responseParts[1])) {
+                    $body = $responseParts[1];
+                }
+
+                $statusCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+                if ($statusCode === 0) {
+                    $responseCollection['success'] = false;
+
+                    $responseCollection['error'] = [
+                        'status' => $statusCode,
+                        'headers' => $headers,
+                        'body' => curl_error($handle),
+                        'token' => $token
+                    ];
+                    continue;
+                }
+
+                $responseCollection['success'] = $responseCollection['success'] && $statusCode == 200;
+
+                $responseCollection['results'][] = [
+                    'status' => $statusCode,
+                    'headers' => $headers,
+                    'body' => (string)$body,
+                    'token' => $token
+                ];
+                curl_multi_remove_handle($mh, $handle);
+                curl_close($handle);
+
+                if (!empty($deviceTokens)) {
+                    $deviceToken = array_pop($deviceTokens);
+                    curl_multi_add_handle($mh, $this->prepareHandle($deviceToken, $message));
+                    $running++;
+                }
+            }
+        }
+
+        if ($this->autoCloseConnections) {
+            curl_multi_close($mh);
+            $this->curlMultiHandle = null;
+        }
+
+        //Set the global feedback
+        $this->setFeedback(json_decode(json_encode($responseCollection)));
+
+        return $responseCollection;
+    }
+
+    /**
+     * Get Url for APNs production server.
+     *
+     * @param Notification $notification
+     * @return string
+     */
+    private function getProductionUrl(string $deviceToken)
+    {
+        return self::APNS_PRODUCTION_SERVER . $this->getUrlPath($deviceToken);
+    }
+
+    /**
+     * Get Url for APNs sandbox server.
+     *
+     * @param Notification $notification
+     * @return string
+     */
+    private function getSandboxUrl(string $deviceToken)
+    {
+        return self::APNS_DEVELOPMENT_SERVER . $this->getUrlPath($deviceToken);
+    }
+
+    /**
+     * Get Url path.
+     *
+     * @param Notification $notification
+     * @return mixed
+     */
+    private function getUrlPath(string $deviceToken)
+    {
+        return str_replace("{token}", $deviceToken, self::APNS_PATH_SCHEMA);
+    }
+
+    /**
+     * Decorate headers
+     *
+     * @return array
+     */
+    public function decorateHeaders(array $headers): array
+    {
+        $decoratedHeaders = [];
+        foreach ($headers as $name => $value) {
+            $decoratedHeaders[] = $name . ': ' . $value;
+        }
+        return $decoratedHeaders;
+    }
+
+    /**
+     * @param $token
+     * @param array $message
+     * @param $request
+     * @param array $deviceTokens
+     */
+    public function prepareHandle($deviceToken, array $message)
+    {
+        $uri = false === $this->config['dry_run'] ? $this->getProductionUrl($deviceToken) : $this->getSandboxUrl($deviceToken);
+        $headers = $message['headers'];
+        unset($message['headers']);
+        $body = json_encode($message);
+
+        $config = $this->config;
+
+        $options = [
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_2,
+            CURLOPT_URL => $uri,
+            CURLOPT_PORT => self::APNS_PORT,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $body,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 10,
+            CURLOPT_HEADER => true,
+
+            CURLOPT_SSLCERT        => $config['certificate'],
+            CURLOPT_SSLCERTPASSWD  => $config['passPhrase'],
+            CURLOPT_SSL_VERIFYPEER => true
+        ];
+
+        $ch = curl_init();
+
+        curl_setopt_array($ch, $options);
+        if (!empty($headers)) {
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $this->decorateHeaders($headers));
+        }
+
+        // store device token to identify response
+        curl_setopt($ch, CURLOPT_PRIVATE, $deviceToken);
+
+        return $ch;
     }
 
     /**
@@ -202,242 +319,6 @@ class Apn extends PushService implements PushServiceInterface
 
         $this->messageNoExistCertificate();
         return false;
-    }
-
-    /**
-     * Compose the stream socket
-     *
-     * @return resource
-     */
-    private function composeStreamSocket()
-    {
-        $ctx = stream_context_create();
-
-        //Already checked if certificate exists.
-        $certificate = $this->config['certificate'];
-        stream_context_set_option($ctx, 'ssl', 'local_cert', $certificate);
-
-        if (isset($this->config['passPhrase'])) {
-            $passPhrase = $this->config['passPhrase'];
-            if (!empty($passPhrase)) {
-                stream_context_set_option($ctx, 'ssl', 'passphrase', $passPhrase);
-            }
-        }
-
-        if (isset($this->config['passFile'])) {
-            $passFile = $this->config['passFile'];
-            if (file_exists($passFile)) {
-                stream_context_set_option($ctx, 'ssl', 'local_pk', $passFile);
-            }
-        }
-
-        return $ctx;
-    }
-
-    /**
-     * Create the connection to APNS server
-     * If some error, the error is stored in class feedback property.
-     * IF OKAY, return connection
-     *
-     * @return bool|resource
-     */
-    private function openConnectionAPNS($ctx)
-    {
-        $fp = false;
-
-        // Open a connection to the APNS server
-        try {
-            $fp = stream_socket_client(
-                $this->url,
-                $err,
-                $errstr,
-                60,
-                STREAM_CLIENT_CONNECT|STREAM_CLIENT_PERSISTENT,
-                $ctx
-            );
-
-            stream_set_blocking($fp, 0);
-
-            if (!$fp) {
-                $response = ['success' => false, 'error' => "Failed to connect: $err $errstr" . PHP_EOL];
-
-                $this->setFeedback(json_decode(json_encode($response)));
-
-            }
-
-        } catch (\Exception $e) {
-            //if stream socket can't be established, try again
-            if ($this->canRetry()) {
-                return $this->openConnectionAPNS($ctx);
-            }
-
-            $response = ['success' => false, 'error' => 'Connection problem: ' . $e->getMessage() . PHP_EOL];
-            $this->setFeedback(json_decode(json_encode($response)));
-
-        } finally {
-            $this->resetAttempts();
-            return $fp;
-        }
-    }
-
-    /**
-     * Send Push Notification
-     * @param  array $deviceTokens
-     * @param array $message
-     * @return \stdClass  APN Response
-     */
-    public function send(array $deviceTokens, array $message)
-    {
-
-        /**
-         * If there isn't certificate returns the feedback.
-         * Feedback has been loaded in existCertificate method if no certificate found
-         */
-        if (!$this->existCertificate()) {
-            return $this->feedback;
-        }
-
-        // Encode the payload as JSON
-        $payload = json_encode($message);
-
-        //When sending a notification we prepare a clean feedback
-        $feedback = $this->initializeFeedback();
-
-        foreach ($deviceTokens as $token) {
-            /**
-             * Open APN connection
-             */
-            $ctx = $this->composeStreamSocket();
-
-            $fp = $this->openConnectionAPNS($ctx);
-            if (!$fp) {
-                return $this->feedback;
-            }
-
-
-            // Build the binary notification
-            //Check if the token is numeric not to get PHP Warnings with pack function.
-            if (ctype_xdigit($token)) {
-                $msg = chr(0) . pack('n', 32) . pack('H*', $token) . pack('n', strlen($payload)) . $payload;
-            } else {
-                $feedback['tokenFailList'][] = $token;
-                $feedback['failure'] += 1;
-                continue;
-            }
-
-            $result = fwrite($fp, $msg, strlen($msg));
-
-            if (!$result) {
-                $feedback['tokenFailList'][] = $token;
-                $feedback['failure'] += 1;
-
-            } else {
-                $feedback['success'] += 1;
-            }
-
-            // Close the connection to the server
-            if ($fp) {
-                fclose($fp);
-            }
-
-        }
-
-        /**
-         * Retrieving the apn feedback
-         */
-        $apnsFeedback = $this->apnsFeedback();
-
-        /**
-         * Merge the apn feedback to our custom feedback if there is any.
-         */
-        if (!empty($apnsFeedback)) {
-            $feedback = array_merge($feedback, $apnsFeedback);
-
-            $feedback = $this->updateCustomFeedbackValues($apnsFeedback, $feedback, $deviceTokens);
-        }
-
-        //Set the global feedback
-        $this->setFeedback(json_decode(json_encode($feedback)));
-
-        return $this->feedback;
-    }
-
-    /**
-     * Get the unregistered device tokens from the apns feedback.
-     * Connect to apn server in order to collect the tokens of the apps which were removed from the device.
-     *
-     * @return array
-     */
-    public function apnsFeedback() {
-
-        $feedback_tokens = array();
-
-        if (!$this->existCertificate()) {
-            return $feedback_tokens;
-        }
-
-        //connect to the APNS feedback servers
-        $ctx = $this->composeStreamSocket();
-
-        // Open a connection to the APNS server
-        try {
-            $apns = stream_socket_client($this->feedbackUrl, $errcode, $errstr, 60, STREAM_CLIENT_CONNECT, $ctx);
-
-            //Read the data on the connection:
-            while (!feof($apns)) {
-                $data = fread($apns, 38);
-                if (strlen($data)) {
-                    $feedback_tokens['apnsFeedback'][] = unpack("N1timestamp/n1length/H*devtoken", $data);
-                }
-            }
-            fclose($apns);
-
-        } catch (\Exception $e) {
-            //if stream socket can't be established, try again
-            if ($this->canRetry()) {
-                return $this->apnsFeedback();
-            }
-
-            $response = [
-                'success' => false,
-                'error' => 'APNS feedback connection problem: ' . $e->getMessage() . PHP_EOL
-            ];
-
-            $this->setFeedback(json_decode(json_encode($response)));
-
-        } finally {
-            $this->resetAttempts();
-            return $feedback_tokens;
-        }
-    }
-
-    /**
-     * Update the success and failure values based on apple feedback
-     *
-     * @param $apnsFeedback
-     * @param $feedback
-     * @param $deviceTokens
-     *
-     * @return array $feedback
-     */
-    private function updateCustomFeedbackValues($apnsFeedback, $feedback, $deviceTokens)
-    {
-
-        //Add failures amount based on apple feedback to our custom feedback
-        $feedback['failure'] += count($apnsFeedback['apnsFeedback']);
-
-        //apns tokens
-        $apnsTokens = Arr::pluck($apnsFeedback['apnsFeedback'], 'devtoken');
-
-        foreach ($deviceTokens as $token) {
-            if (in_array($token, $apnsTokens)) {
-                $feedback['success'] -= 1;
-                $feedback['tokenFailList'][] = $token;
-            }
-
-        }
-
-        return $feedback;
     }
 
 }
