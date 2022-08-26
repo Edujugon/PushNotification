@@ -1,7 +1,7 @@
 <?php
-
 namespace Edujugon\PushNotification;
 
+use Edujugon\PushNotification\Exceptions\PushNotificationException;
 
 abstract class PushService
 {
@@ -14,7 +14,7 @@ abstract class PushService
     protected $url = '';
 
     /**
-     * Confing details
+     * Config details
      * By default priority is set to high and dry_run to false
      *
      * @var array
@@ -49,29 +49,32 @@ abstract class PushService
      */
     public function setConfig(array $config)
     {
-        $this->config = array_replace($this->config,$config);
+        $this->config = array_replace($this->config, $config);
     }
 
     /**
      * Initialize the configuration for the chosen push service // gcm,etc..
-     * Check if config_path exist as function 
-     * 
+     *
      * @param $service
+     *
+     * @throws PushNotificationException
+     *
      * @return mixed
      */
     public function initializeConfig($service)
     {
-        if(function_exists('config_path'))
-        {
-            if(file_exists(config_path('pushnotification.php')))
-            {
-                $configuration = include(config_path('pushnotification.php'));
-                return $configuration[$service];
-            }
+        if (function_exists('config_path') &&
+            file_exists(config_path('pushnotification.php')) &&
+            function_exists('app')
+        ) {
+            $configuration = app('config')->get('pushnotification');
+        } else {
+            $configuration = include(__DIR__ . '/Config/config.php');
         }
 
-        $configuration = include(__DIR__ . '/Config/config.php');
-
+        if (!array_key_exists($service, $configuration)) {
+            throw new PushNotificationException("Service '$service' missed in config/pushnotification.php");
+        }
         return $configuration[$service];
     }
 
@@ -94,8 +97,9 @@ abstract class PushService
      * @param $property
      * @return mixed|null
      */
-    public function __get($property){
-        return property_exists($this,$property) ? $this->$property : null;
+    public function __get($property)
+    {
+        return property_exists($this, $property) ? $this->$property : null;
     }
 
 }

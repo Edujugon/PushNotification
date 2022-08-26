@@ -35,7 +35,7 @@ class Gcm extends PushService implements PushServiceInterface
     }
 
     /**
-     * Provide the unregistered tokens of the notification sent.
+     * Provide the unregistered tokens of the sent notification.
      *
      * @param array $devices_token
      * @return array $tokenUnRegistered
@@ -45,18 +45,17 @@ class Gcm extends PushService implements PushServiceInterface
         /**
          * If there is any failure sending the notification
          */
-        if($this->feedback && isset($this->feedback->failure))
-        {
-
+        if ($this->feedback && isset($this->feedback->failure)) {
             $unRegisteredTokens = $devices_token;
 
             /**
              * Walk the array looking for any error.
              * If no error, unset it from all token list which will become the unregistered tokens array.
              */
-            foreach ($this->feedback->results as $key => $message)
-            {
-                if(! isset($message->error)) unset( $unRegisteredTokens[$key] );
+            foreach ($this->feedback->results as $key => $message) {
+                if (!isset($message->error)) {
+                    unset($unRegisteredTokens[$key]);
+                }
             }
 
             return $unRegisteredTokens;
@@ -72,14 +71,14 @@ class Gcm extends PushService implements PushServiceInterface
      * @param $message
      * @return array
      */
-    protected function addRequestFields($deviceTokens, $message){
+    protected function addRequestFields($deviceTokens, $message)
+    {
 
         $params = $this->cleanConfigParams();
 
         $message = $this->buildMessage($message);
 
-        return array_merge($params,$message,['registration_ids'  => $deviceTokens]);
-
+        return array_merge($params, $message, ['registration_ids'  => $deviceTokens]);
     }
 
     /**
@@ -88,9 +87,10 @@ class Gcm extends PushService implements PushServiceInterface
      */
     protected function buildMessage($message)
     {
-        // if NO notification and data keys, then set Data Message as default.
-        if(!array_key_exists('data',$message) && !array_key_exists('notification',$message))
+        // if no notification nor data keys, then set Data Message as default.
+        if (!array_key_exists('data', $message) && !array_key_exists('notification', $message)) {
             return ['data' => $message];
+        }
 
         return $message;
     }
@@ -100,16 +100,16 @@ class Gcm extends PushService implements PushServiceInterface
      *
      * @return array
      */
-    private function cleanConfigParams(){
-
+    private function cleanConfigParams()
+    {
         /**
          * Add the params you want to be removed from the push notification
          */
         $paramsToBeRemoved = ['apiKey'];
 
-        return array_filter($this->config,function($key) use($paramsToBeRemoved){
-            return !in_array($key,$paramsToBeRemoved);
-        },ARRAY_FILTER_USE_KEY);
+        return array_filter($this->config, function ($key) use ($paramsToBeRemoved) {
+            return !in_array($key, $paramsToBeRemoved);
+        }, ARRAY_FILTER_USE_KEY);
     }
 
     /**
@@ -117,7 +117,8 @@ class Gcm extends PushService implements PushServiceInterface
      *
      * @return array
      */
-    protected function addRequestHeaders(){
+    protected function addRequestHeaders()
+    {
         return [
             'Authorization' => 'key=' . $this->config['apiKey'],
             'Content-Type:' =>'application/json'
@@ -126,17 +127,19 @@ class Gcm extends PushService implements PushServiceInterface
 
     /**
      * Send Push Notification
+     *
      * @param  array $deviceTokens
      * @param array $message
+     *
      * @return \stdClass  GCM Response
      */
-    public function send(array $deviceTokens,array $message)
+    public function send(array $deviceTokens, array $message)
     {
 
-        $fields = $this->addRequestFields($deviceTokens,$message);
+        $fields = $this->addRequestFields($deviceTokens, $message);
         $headers = $this->addRequestHeaders();
-        try
-        {
+
+        try {
             $result = $this->client->post(
                 $this->url,
                 [
@@ -147,18 +150,16 @@ class Gcm extends PushService implements PushServiceInterface
 
             $json = $result->getBody();
 
-            $this->setFeedback(json_decode($json));
+            $this->setFeedback(json_decode($json, false, 512, JSON_BIGINT_AS_STRING));
 
             return $this->feedback;
 
-        }catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             $response = ['success' => false, 'error' => $e->getMessage()];
             
-            $this->setFeedback(json_decode(json_encode($response), FALSE));
+            $this->setFeedback(json_decode(json_encode($response)));
 
             return $this->feedback;
         }
-
     }
 }

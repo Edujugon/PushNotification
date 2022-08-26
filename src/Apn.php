@@ -6,6 +6,8 @@ use Edujugon\PushNotification\Contracts\PushServiceInterface;
 class Apn extends PushService implements PushServiceInterface
 {
 
+    const MAX_ATTEMPTS = 3;
+
     /**
      * Url for development purposes
      *
@@ -40,6 +42,16 @@ class Apn extends PushService implements PushServiceInterface
     private $feedbackUrl;
 
     /**
+     * The number of attempts to re-try before failing.
+     * Set to zero for unlimited attempts.
+     *
+     * @var int
+     */
+    private $maxAttempts = self::MAX_ATTEMPTS;
+
+    private $attempts = 0;
+
+    /**
      * Apn constructor.
      */
     public function __construct()
@@ -63,7 +75,7 @@ class Apn extends PushService implements PushServiceInterface
         parent::setConfig($config);
 
         $this->setProperGateway();
-
+        $this->setRetryAttemptsIfConfigured();
     }
 
     /**
@@ -73,17 +85,67 @@ class Apn extends PushService implements PushServiceInterface
      */
     private function setProperGateway()
     {
-        if(isset($this->config['dry_run']))
-        {
-            if($this->config['dry_run']){
+        if (isset($this->config['dry_run'])) {
+            if ($this->config['dry_run']) {
                 $this->setUrl($this->sandboxUrl);
                 $this->feedbackUrl = $this->feedbackSandboxUrl;
 
-            }else {
+            } else {
                 $this->setUrl($this->productionUrl);
                 $this->feedbackUrl = $this->feedbackProductionUrl;
             }
         }
+    }
+
+    /**
+     * Configure re-try attempts.
+     *
+     * @return void
+     */
+    private function setRetryAttemptsIfConfigured()
+    {
+        if (isset($this->config['connection_attempts']) &&
+            is_numeric($this->config['connection_attempts'])) {
+            $this->maxAttempts = $this->config['connection_attempts'];
+        }
+    }
+
+    /**
+     * Determines whether the connection attempts should be unlimited.
+     *
+     * @return bool
+     */
+    private function isUnlimitedAttempts()
+    {
+        return $this->maxAttempts == 0;
+    }
+
+    /**
+     * Check if can retry a connection
+     *
+     * @return bool
+     */
+    private function canRetry()
+    {
+        if ($this->isUnlimitedAttempts()) {
+            return true;
+        }
+
+        $this->attempts++;
+
+        return $this->attempts < $this->maxAttempts;
+    }
+
+    /**
+     * Reset connection attempts
+     *
+     * @return $this
+     */
+    private function resetAttempts()
+    {
+        $this->attempts = 0;
+
+        return $this;
     }
 
     /**
@@ -96,10 +158,12 @@ class Apn extends PushService implements PushServiceInterface
     {
         $tokens = [];
 
-        if(! empty($this->feedback->tokenFailList))
-            $tokens =  $this->feedback->tokenFailList;
-        if(!empty($this->feedback->apnsFeedback))
-            $tokens = array_merge($tokens,array_pluck($this->feedback->apnsFeedback,'devtoken'));
+        if (!empty($this->feedback->tokenFailList)) {
+            $tokens = $this->feedback->tokenFailList;
+        }
+        if (!empty($this->feedback->apnsFeedback)) {
+            $tokens = array_merge($tokens, array_pluck($this->feedback->apnsFeedback, 'devtoken'));
+        }
 
         return $tokens;
     }
@@ -111,9 +175,12 @@ class Apn extends PushService implements PushServiceInterface
      */
     private function messageNoExistCertificate()
     {
-        $response = ['success' => false, 'error' => "Please, add your APN certificate to the iosCertificates folder." . PHP_EOL];
+        $response = [
+            'success' => false,
+            'error' => "Please, add your APN certificate to the iosCertificates folder." . PHP_EOL
+        ];
 
-        $this->setFeedback(json_decode(json_encode($response), FALSE));
+        $this->setFeedback(json_decode(json_encode($response)));
     }
 
     /**
@@ -122,11 +189,9 @@ class Apn extends PushService implements PushServiceInterface
      */
     private function existCertificate()
     {
-        if(isset($this->config['certificate']))
-        {
+        if (isset($this->config['certificate'])) {
             $certificate = $this->config['certificate'];
-            if(!file_exists($certificate))
-            {
+            if (!file_exists($certificate)) {
                 $this->messageNoExistCertificate();
                 return false;
             }
@@ -151,16 +216,18 @@ class Apn extends PushService implements PushServiceInterface
         $certificate = $this->config['certificate'];
         stream_context_set_option($ctx, 'ssl', 'local_cert', $certificate);
 
-        if(isset($this->config['passPhrase']))
-        {
+        if (isset($this->config['passPhrase'])) {
             $passPhrase = $this->config['passPhrase'];
-            if(!empty($passPhrase)) stream_context_set_option($ctx, 'ssl', 'passphrase', $passPhrase);
+            if (!empty($passPhrase)) {
+                stream_context_set_option($ctx, 'ssl', 'passphrase', $passPhrase);
+            }
         }
 
-        if(isset($this->config['passFile']))
-        {
+        if (isset($this->config['passFile'])) {
             $passFile = $this->config['passFile'];
-            if(file_exists($passFile)) stream_context_set_option($ctx, 'ssl', 'local_pk', $passFile);
+            if (file_exists($passFile)) {
+                stream_context_set_option($ctx, 'ssl', 'local_pk', $passFile);
+            }
         }
 
         return $ctx;
@@ -175,28 +242,41 @@ class Apn extends PushService implements PushServiceInterface
      */
     private function openConnectionAPNS($ctx)
     {
+        $fp = false;
 
         // Open a connection to the APNS server
-        try{
+        try {
             $fp = stream_socket_client(
-                $this->url, $err,
-                $errstr, 60, STREAM_CLIENT_CONNECT|STREAM_CLIENT_PERSISTENT, $ctx);
-        }catch (\Exception $e){
+                $this->url,
+                $err,
+                $errstr,
+                60,
+                STREAM_CLIENT_CONNECT|STREAM_CLIENT_PERSISTENT,
+                $ctx
+            );
+
+            stream_set_blocking($fp, 0);
+
+            if (!$fp) {
+                $response = ['success' => false, 'error' => "Failed to connect: $err $errstr" . PHP_EOL];
+
+                $this->setFeedback(json_decode(json_encode($response)));
+
+            }
+
+        } catch (\Exception $e) {
             //if stream socket can't be established, try again
-            return $this->openConnectionAPNS($ctx);
+            if ($this->canRetry()) {
+                return $this->openConnectionAPNS($ctx);
+            }
+
+            $response = ['success' => false, 'error' => 'Connection problem: ' . $e->getMessage() . PHP_EOL];
+            $this->setFeedback(json_decode(json_encode($response)));
+
+        } finally {
+            $this->resetAttempts();
+            return $fp;
         }
-
-        stream_set_blocking ($fp, 0);
-
-        if (!$fp)
-        {
-            $response = ['success' => false, 'error' => "Failed to connect: $err $errstr" . PHP_EOL];
-
-            $this->setFeedback(json_decode(json_encode($response), FALSE));
-
-            return false;
-        }
-        return $fp;
     }
 
     /**
@@ -205,14 +285,16 @@ class Apn extends PushService implements PushServiceInterface
      * @param array $message
      * @return \stdClass  APN Response
      */
-    public function send(array $deviceTokens,array $message)
+    public function send(array $deviceTokens, array $message)
     {
 
         /**
          * If there isn't certificate returns the feedback.
          * Feedback has been loaded in existCertificate method if no certificate found
          */
-        if(!$this->existCertificate()) return $this->feedback;
+        if (!$this->existCertificate()) {
+            return $this->feedback;
+        }
 
         // Encode the payload as JSON
         $payload = json_encode($message);
@@ -220,23 +302,23 @@ class Apn extends PushService implements PushServiceInterface
         //When sending a notification we prepare a clean feedback
         $feedback = $this->initializeFeedback();
 
-        foreach ($deviceTokens as $token)
-        {
+        foreach ($deviceTokens as $token) {
             /**
              * Open APN connection
              */
             $ctx = $this->composeStreamSocket();
 
             $fp = $this->openConnectionAPNS($ctx);
-            if(!$fp) return $this->feedback;
+            if (!$fp) {
+                return $this->feedback;
+            }
 
 
             // Build the binary notification
-            //Check if the token is numeric no to get PHP Warnings with pack function.
-            if (ctype_xdigit($token))  {
+            //Check if the token is numeric not to get PHP Warnings with pack function.
+            if (ctype_xdigit($token)) {
                 $msg = chr(0) . pack('n', 32) . pack('H*', $token) . pack('n', strlen($payload)) . $payload;
-            }else
-            {
+            } else {
                 $feedback['tokenFailList'][] = $token;
                 $feedback['failure'] += 1;
                 continue;
@@ -244,13 +326,13 @@ class Apn extends PushService implements PushServiceInterface
 
             $result = fwrite($fp, $msg, strlen($msg));
 
-            if (!$result)
-            {
+            if (!$result) {
                 $feedback['tokenFailList'][] = $token;
                 $feedback['failure'] += 1;
 
-            }else
+            } else {
                 $feedback['success'] += 1;
+            }
 
             // Close the connection to the server
             if ($fp) {
@@ -267,18 +349,16 @@ class Apn extends PushService implements PushServiceInterface
         /**
          * Merge the apn feedback to our custom feedback if there is any.
          */
-        if(!empty($apnsFeedback))
-        {
-            $feedback = array_merge($feedback,$apnsFeedback);
+        if (!empty($apnsFeedback)) {
+            $feedback = array_merge($feedback, $apnsFeedback);
 
-            $feedback = $this->updateCustomFeedbackValues($apnsFeedback, $feedback,$deviceTokens);
+            $feedback = $this->updateCustomFeedbackValues($apnsFeedback, $feedback, $deviceTokens);
         }
 
         //Set the global feedback
-        $this->setFeedback(json_decode(json_encode($feedback), FALSE));
+        $this->setFeedback(json_decode(json_encode($feedback)));
 
         return $this->feedback;
-
     }
 
     /**
@@ -291,30 +371,43 @@ class Apn extends PushService implements PushServiceInterface
 
         $feedback_tokens = array();
 
-        if(!$this->existCertificate()) return $feedback_tokens;
+        if (!$this->existCertificate()) {
+            return $feedback_tokens;
+        }
 
         //connect to the APNS feedback servers
         $ctx = $this->composeStreamSocket();
 
         // Open a connection to the APNS server
-        try{
+        try {
             $apns = stream_socket_client($this->feedbackUrl, $errcode, $errstr, 60, STREAM_CLIENT_CONNECT, $ctx);
-        }catch (\Exception $e){
-            //if stream socket can't be established, try again
-            return $this->apnsFeedback();
-        }
 
-        //Read the data on the connection:
-        while(!feof($apns)) {
-            $data = fread($apns, 38);
-            if(strlen($data)) {
-                $feedback_tokens['apnsFeedback'][] = unpack("N1timestamp/n1length/H*devtoken", $data);
+            //Read the data on the connection:
+            while (!feof($apns)) {
+                $data = fread($apns, 38);
+                if (strlen($data)) {
+                    $feedback_tokens['apnsFeedback'][] = unpack("N1timestamp/n1length/H*devtoken", $data);
+                }
             }
+            fclose($apns);
+
+        } catch (\Exception $e) {
+            //if stream socket can't be established, try again
+            if ($this->canRetry()) {
+                return $this->apnsFeedback();
+            }
+
+            $response = [
+                'success' => false,
+                'error' => 'APNS feedback connection problem: ' . $e->getMessage() . PHP_EOL
+            ];
+
+            $this->setFeedback(json_decode(json_encode($response)));
+
+        } finally {
+            $this->resetAttempts();
+            return $feedback_tokens;
         }
-        fclose($apns);
-
-        return $feedback_tokens;
-
     }
 
     /**
@@ -326,18 +419,17 @@ class Apn extends PushService implements PushServiceInterface
      *
      * @return array $feedback
      */
-    private function updateCustomFeedbackValues($apnsFeedback, $feedback,$deviceTokens)
+    private function updateCustomFeedbackValues($apnsFeedback, $feedback, $deviceTokens)
     {
 
         //Add failures amount based on apple feedback to our custom feedback
         $feedback['failure'] += count($apnsFeedback['apnsFeedback']);
 
         //apns tokens
-        $apnsTokens = array_pluck($apnsFeedback['apnsFeedback'],'devtoken');
+        $apnsTokens = array_pluck($apnsFeedback['apnsFeedback'], 'devtoken');
 
-        foreach ($deviceTokens as $token)
-        {
-            if(in_array($token, $apnsTokens)){
+        foreach ($deviceTokens as $token) {
+            if (in_array($token, $apnsTokens)) {
                 $feedback['success'] -= 1;
                 $feedback['tokenFailList'][] = $token;
             }
