@@ -8,11 +8,13 @@ return [
         'priority' => 'normal',
         'dry_run' => false,
         'apiKey' => 'My_ApiKey',
+        'guzzle' => [],
     ],
     'fcm' => [
         'priority' => 'normal',
         'dry_run' => false,
         'apiKey' => 'My_ApiKey',
+        'guzzle' => [],
     ],
     'apn' => [
         'certificate' => __DIR__ . '/iosCertificates/apns-dev-cert.pem',
