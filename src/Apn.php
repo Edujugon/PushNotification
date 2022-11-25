@@ -252,8 +252,10 @@ class Apn extends PushService implements PushServiceInterface
     public function prepareHandle($deviceToken, array $message)
     {
         $uri = false === $this->config['dry_run'] ? $this->getProductionUrl($deviceToken) : $this->getSandboxUrl($deviceToken);
-        $headers = $message['headers'];
-        unset($message['headers']);
+        $headers = $message['headers'] ?? [];
+        if (isset($message['headers'])) {
+            unset($message['headers']);
+        }
         $body = json_encode($message);
 
         $config = $this->config;
@@ -269,9 +271,12 @@ class Apn extends PushService implements PushServiceInterface
             CURLOPT_HEADER => true,
 
             CURLOPT_SSLCERT        => $config['certificate'],
-            CURLOPT_SSLCERTPASSWD  => $config['passPhrase'],
             CURLOPT_SSL_VERIFYPEER => true
         ];
+
+        if (isset($config['passPhrase'])) {
+            $options[CURLOPT_SSLCERTPASSWD] = $config['passPhrase'];
+        }
 
         $ch = curl_init();
 
