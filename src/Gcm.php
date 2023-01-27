@@ -31,7 +31,7 @@ class Gcm extends PushService implements PushServiceInterface
         $this->url = 'https://fcm.googleapis.com/fcm/send';
 
         $this->config = $this->initializeConfig('fcm');
-        $this->client = new Client;
+        $this->client = new Client($this->config['guzzle'] ?? []);
     }
 
     /**

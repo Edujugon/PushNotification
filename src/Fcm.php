@@ -16,7 +16,7 @@ class Fcm extends Gcm
 
         $this->config = $this->initializeConfig('fcm');
 
-        $this->client = new Client();
+        $this->client = new Client($this->config['guzzle'] ?? []);
     }
 
     /**
