@@ -8,11 +8,17 @@ return [
         'priority' => 'normal',
         'dry_run' => false,
         'apiKey' => 'My_ApiKey',
+        // Optional: Default Guzzle request options for each GCM request
+        // See https://docs.guzzlephp.org/en/stable/request-options.html
+        'guzzle' => [],
     ],
     'fcm' => [
         'priority' => 'normal',
         'dry_run' => false,
         'apiKey' => 'My_ApiKey',
+        // Optional: Default Guzzle request options for each FCM request
+        // See https://docs.guzzlephp.org/en/stable/request-options.html
+        'guzzle' => [],
     ],
     'apn' => [
         'certificate' => __DIR__ . '/iosCertificates/apns-dev-cert.pem',
