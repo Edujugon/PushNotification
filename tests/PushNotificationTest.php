@@ -126,11 +126,51 @@ class PushNotificationTest extends TestCase {
     }
 
     /** @test */
+    public function send_method_in_apnp8_service()
+    {
+        $push = new PushNotification('apnp8');
+
+        $message = [
+            'aps' => [
+                'alert' => [
+                    'title' => '1 Notification test',
+                    'body' => 'Just for testing purposes'
+                ],
+                'sound' => 'default'
+
+            ]
+        ];
+
+        $push->setMessage($message)
+            ->setDevicesToken([
+                '507e3adaf433ae3e6234f35c82f8a43ad0d84218bff08f16ea7be0869f066c0312',
+                'ac566b885e91ee74a8d12482ae4e1dfd2da1e26881105dec262fcbe0e082a358',
+                '507e3adaf433ae3e6234f35c82f8a43ad0d84218bff08f16ea7be0869f066c0312'
+            ]);
+
+        $push = $push->send();
+        //var_dump($push->getFeedback());
+        $this->assertInstanceOf('stdClass', $push->getFeedback());
+        $this->assertIsArray($push->getUnregisteredDeviceTokens());
+    }
+
+    /** @test */
     public function apn_without_certificate()
     {
         $push = new PushNotification('apn');
 
         $push->setConfig(['custom' => 'Custom Value','certificate' => 'MycustomValue']);
+        $push->send();
+        $this->assertTrue(isset($push->feedback->error));
+        $this->assertFalse($push->feedback->success);
+    }
+
+    /** @test */
+    public function apnp8_without_key()
+    {
+        $push = new PushNotification('app8');
+
+        $push->setConfig(['custom' => 'Custom Value','key' => 'MycustomValue']);
         $push->send();
         $this->assertTrue(isset($push->feedback->error));
         $this->assertFalse($push->feedback->success);
@@ -165,7 +205,7 @@ class PushNotificationTest extends TestCase {
     {
         $push = new PushNotification();
 
-        $this->assertCount(3, $push->servicesList);
+        $this->assertCount(4, $push->servicesList);
         $this->assertIsArray($push->servicesList);
     }
 
@@ -199,6 +239,32 @@ class PushNotificationTest extends TestCase {
     public function apn_feedback()
     {
         $push = new PushNotification('apn');
+
+        $message = [
+            'aps' => [
+                'alert' => [
+                    'title' => 'New Notification test',
+                    'body' => 'Just for testing purposes'
+                ],
+                'sound' => 'default'
+
+            ]
+        ];
+
+        $push->setMessage($message)
+            ->setDevicesToken([
+                'asdfasdf'
+            ]);
+
+        $push->send();
+        $this->assertInstanceOf('stdClass', $push->getFeedback());
+        $this->assertIsArray($push->getUnregisteredDeviceTokens());
+    }
+
+    /** @test */
+    public function apnp8_feedback()
+    {
+        $push = new PushNotification('apnp8');
 
         $message = [
             'aps' => [
@@ -313,11 +379,38 @@ class PushNotificationTest extends TestCase {
         $key = 'connection_attempts';
         $this->assertArrayNotHasKey($key, $push->config);
     }
+  
+    /** @test */
+    public function apnp8_connection_attempts_default()
+    {
+        $push = new PushNotification('apnp8');
+
+        $push->setConfig(['dry_run' => true]);
+
+        $key = 'connection_attempts';
+        $this->assertArrayNotHasKey($key, $push->config);
+    }
 
     /** @test */
     public function set_apn_connect_attempts_override_default()
     {
         $push = new PushNotification('apn');
+
+        $expected = 0;
+        $push->setConfig([
+            'dry_run' => true,
+            'connection_attempts' => $expected,
+        ]);
+
+        $key = 'connection_attempts';
+        $this->assertArrayHasKey($key, $push->config);
+        $this->assertEquals($expected, $push->config[$key]);
+    }
+
+    /** @test */
+    public function set_apnp8_connect_attempts_override_default()
+    {
+        $push = new PushNotification('apnp8');
 
         $expected = 0;
         $push->setConfig([
