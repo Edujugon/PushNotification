@@ -16,6 +16,8 @@ class FcmV1 extends Fcm
 {
     const CACHE_SECONDS = 55 * 60; // 55 minutes
 
+    protected $unregisteredDeviceTokens = [];
+
     /**
      * Fcm constructor.
      * Override parent constructor.
@@ -87,6 +89,7 @@ class FcmV1 extends Fcm
         $jsonData = ['message' => $this->buildMessage($message)];
 
         $feedbacks = [];
+        $this->unregisteredDeviceTokens = [];
 
         foreach ($deviceTokens as $deviceToken) {
             try {
@@ -102,15 +105,39 @@ class FcmV1 extends Fcm
 
                 $json = $result->getBody();
 
-                $feedbacks[] = json_decode($json, false, 512, JSON_BIGINT_AS_STRING);
+                $feedbacks[$deviceToken] = [
+                    'success' => true,
+                    'response' => json_decode($json, true, 512, JSON_BIGINT_AS_STRING),
+                ];
             } catch (ClientException $e) {
-                $feedbacks[] = ['success' => false, 'error' => json_encode($e->getResponse())];
+                $feedbacks[$deviceToken] = [
+                    'success' => false,
+                    'error' => json_decode($e->getResponse()->getBody()->getContents(), true),
+                ];
+
+                $this->unregisteredDeviceTokens[] = $deviceToken;
             } catch (\Exception $e) {
-                $feedbacks[] = ['success' => false, 'error' => $e->getMessage()];
+                $feedbacks[$deviceToken] = [
+                    'success' => false,
+                    'error' => $e->getMessage(),
+                ];
+
+                $this->unregisteredDeviceTokens[] = $deviceToken;
             }
         }
 
         $this->setFeedback($feedbacks);
+    }
+
+    /**
+     * Provide the unregistered tokens of the sent notification.
+     *
+     * @param array $devices_token
+     * @return array $tokenUnRegistered
+     */
+    public function getUnregisteredDeviceTokens(array $devices_token)
+    {
+        return $this->unregisteredDeviceTokens;
     }
 
     /**
