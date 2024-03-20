@@ -8,7 +8,10 @@ use Exception;
 use Google\Client as GoogleClient;
 use Google\Service\FirebaseCloudMessaging;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Pool;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response as GuzzleResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
@@ -16,7 +19,16 @@ class FcmV1 extends Fcm
 {
     const CACHE_SECONDS = 55 * 60; // 55 minutes
 
+    /**
+     * Number of concurrent requests to multiplex in the same connection.
+     *
+     * @var int
+     */
+    protected $concurrentRequests = 10;
+
     protected $unregisteredDeviceTokens = [];
+
+    protected $feedbacks = [];
 
     /**
      * Fcm constructor.
@@ -29,6 +41,8 @@ class FcmV1 extends Fcm
         $this->url = 'https://fcm.googleapis.com/v1/projects/' . $this->config['projectId'] . '/messages:send';
 
         $this->client = new Client($this->config['guzzle'] ?? []);
+
+        $this->concurrentRequests = $this->config['concurrentRequests'] ?? 10;
     }
 
     /**
@@ -88,45 +102,51 @@ class FcmV1 extends Fcm
         $headers = $this->addRequestHeaders();
         $jsonData = ['message' => $this->buildMessage($message)];
 
-        $feedbacks = [];
+        $this->feedbacks = [];
         $this->unregisteredDeviceTokens = [];
 
+        $requests = [];
         foreach ($deviceTokens as $deviceToken) {
-            try {
-                $jsonData['message']['token'] = $deviceToken;
+            $jsonData['message']['token'] = $deviceToken;
 
-                $result = $this->client->post(
-                    $this->url,
-                    [
-                        'headers' => $headers,
-                        'json' => $jsonData,
-                    ]
-                );
+            $body = json_encode($jsonData);
 
-                $json = $result->getBody();
-
-                $feedbacks[$deviceToken] = [
-                    'success' => true,
-                    'response' => json_decode($json, true, 512, JSON_BIGINT_AS_STRING),
-                ];
-            } catch (ClientException $e) {
-                $feedbacks[$deviceToken] = [
-                    'success' => false,
-                    'error' => json_decode($e->getResponse()->getBody()->getContents(), true),
-                ];
-
-                $this->unregisteredDeviceTokens[] = $deviceToken;
-            } catch (\Exception $e) {
-                $feedbacks[$deviceToken] = [
-                    'success' => false,
-                    'error' => $e->getMessage(),
-                ];
-
-                $this->unregisteredDeviceTokens[] = $deviceToken;
-            }
+            $requests[$deviceToken] = new Request('POST', $this->url, $headers, $body);
         }
 
-        $this->setFeedback($feedbacks);
+        $pool = new Pool($this->client, $requests, [
+            'concurrency' => $this->concurrentRequests,
+            'fulfilled' => function (GuzzleResponse $response, $deviceToken) {
+                // this is delivered each successful response
+
+                $this->feedbacks[$deviceToken] = [
+                    'success' => true,
+                    'response' => json_decode((string) $response->getBody(), true, 512, JSON_BIGINT_AS_STRING),
+                ];
+            },
+            'rejected' => function (RequestException $reason, $deviceToken) {
+                // this is delivered each failed request
+
+                $error = json_decode((string) $reason->getResponse()->getBody(), true);
+
+                $this->feedbacks[$deviceToken] = [
+                    'success' => false,
+                    'error' => $error,
+                ];
+
+                if (isset($error['error']['status']) && $error['error']['status'] === 'INVALID_ARGUMENT') {
+                    $this->unregisteredDeviceTokens[] = $deviceToken;
+                }
+            },
+        ]);
+
+        // Initiate the transfers and create a promise
+        $promise = $pool->promise();
+
+        // Force the pool of requests to complete.
+        $promise->wait();
+
+        $this->setFeedback($this->feedbacks);
     }
 
     /**
