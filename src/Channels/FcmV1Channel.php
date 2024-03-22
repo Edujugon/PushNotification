@@ -2,7 +2,7 @@
 
 namespace Edujugon\PushNotification\Channels;
 
-class FcmChannel extends GcmChannel
+class FcmV1Channel extends GcmChannel
 {
     /**
      * {@inheritdoc}
