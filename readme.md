@@ -11,6 +11,7 @@ This is an easy to use package to send push notification.
 
 * GCM
 * FCM
+* FCMV1
 * APN
 
 ## Installation
@@ -58,6 +59,28 @@ $push->setConfig([
     'time_to_live' => 3
 ]);
 ```
+
+The default configuration parameters for **FCMV1** are :
+
+*   ```priority => 'normal'```
+*   ```dry_run => false```
+*   ```projectId => 'my-project-id'```
+*   ```jsonFile => __DIR__ . '/fcmCertificates/file.json'```
+
+You can dynamically update those values or adding new ones calling the method setConfig like so:
+```php
+$push->setConfig([
+    'priority' => 'high',
+    'projectId' => 'my-real-project-id',
+    'jsonFile' => 'path/to/credentials.json'
+]);
+```
+
+To generate a credentials json file for your service account:
+
+*   In the Firebase console, open **Settings** > [Service Accounts](https://console.firebase.google.com/project/_/settings/serviceaccounts/adminsdk).
+*   Click **Generate New Private Key**, then confirm by clicking **Generate Key**.
+*   Securely store the JSON file containing the key.
 
 
 The default configuration parameters for **APN** are:
@@ -117,6 +140,11 @@ For FCM Service:
 $push = new PushNotification('fcm');
 ```
 
+For FCMV1 Service:
+```php
+$push = new PushNotification('fcmv1');
+```
+
 Now you may use any method that you need. Please see the API List.
 
 
@@ -138,6 +166,11 @@ Now you may use any method that you need. Please see the API List.
 ### Only for Fcm
 
 - [sendByTopic](https://github.com/edujugon/PushNotification#sendbytopic)
+
+### Only for Fcmv1
+
+- [setProjectId](https://github.com/edujugon/PushNotification#setprojectid)
+- [setJsonFile](https://github.com/edujugon/PushNotification#setjsonfile)
 
 > Go to [Usage samples](https://github.com/edujugon/PushNotification#usage-samples) directly.
 
@@ -171,6 +204,30 @@ object setMessage(array $data)
 
 ```php
 object setApiKey($api_key)
+```
+
+#### setProjectId
+
+> Only for fcmv1
+
+`setProjectId` method sets the Project ID of your App as a string.
+
+**Syntax**
+
+```php
+object setProjectId($project_id)
+```
+
+#### setJsonFile
+
+> Only for fcmv1
+
+`setJsonFile` method sets the path of credentials json file of your App.
+
+**Syntax**
+
+```php
+object setJsonFile($api_key)
 ```
 
 #### setDevicesToken
