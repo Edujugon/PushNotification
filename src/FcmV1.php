@@ -134,7 +134,7 @@ class FcmV1 extends Fcm
                     'error' => $error,
                 ];
 
-                if (isset($error['error']['status']) && $error['error']['status'] === 'INVALID_ARGUMENT') {
+                if (isset($error['error']['code']) && in_array($error['error']['code'], [400, 404])) {
                     $this->unregisteredDeviceTokens[] = $deviceToken;
                 }
             },
