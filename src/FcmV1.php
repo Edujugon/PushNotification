@@ -75,6 +75,18 @@ class FcmV1 extends Fcm
     }
 
     /**
+     * Update the values by key on config array from the passed array. If any key doesn't exist, it's added.
+     * @param array $config
+     */
+    public function setConfig(array $config)
+    {
+        parent::setConfig($config);
+
+        // Update url
+        $this->setProjectId($this->config['projectId']);
+    }
+
+    /**
      * Set the needed headers for the push notification.
      *
      * @return array
