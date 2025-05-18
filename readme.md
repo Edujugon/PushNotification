@@ -12,6 +12,7 @@ This is an easy to use package to send push notification.
 * GCM
 * FCM
 * APN
+* APN with .P8 key
 
 ## Installation
 
@@ -67,7 +68,14 @@ The default configuration parameters for **APN** are:
 *   ```passFile => __DIR__ . '/iosCertificates/yourKey.pem' //Optional```
 *   ```dry_run => false```
 
-(Make sure to set `dry_run` to `true` if you're using development *.pem certificate, and `false` for production)
+The default configuration parameters for **APN P8** are:
+
+*   ```key => __DIR__ . '/key.p8'```
+*   ```keyId => 'MyKeyId'```
+*   ```teamId => 'MyAppleTeamId'```
+*   ```dry_run => false```
+
+(Make sure to set `dry_run` to `true` if you're using development token, and `false` for production)
 
 Also you can update those values and add more dynamically
 ```php
@@ -110,6 +118,9 @@ By default it will use GCM as Push Service provider.
 For APN Service:
 ```php
 $push = new PushNotification('apn');
+```
+```php
+$push = new PushNotification('apnp8');
 ```
 
 For FCM Service:
