@@ -17,7 +17,7 @@ use Illuminate\Support\Str;
 
 class FcmV1 extends Fcm
 {
-    const CACHE_SECONDS = 55 * 60; // 55 minutes
+    const DEFAULT_CREDENTIALS_CACHE_SECONDS = 55 * 60; // 55 minutes
 
     /**
      * Number of concurrent requests to multiplex in the same connection.
@@ -25,6 +25,15 @@ class FcmV1 extends Fcm
      * @var int
      */
     protected $concurrentRequests = 10;
+
+    /**
+     * Credentials cache time in seconds. Maximum 60*60 seconds.
+     *
+     * @var int
+     */
+    protected $credentialsCacheSeconds = self::DEFAULT_CREDENTIALS_CACHE_SECONDS;
+
+    protected $cacheStore = null;
 
     protected $unregisteredDeviceTokens = [];
 
@@ -43,6 +52,10 @@ class FcmV1 extends Fcm
         $this->client = new Client($this->config['guzzle'] ?? []);
 
         $this->concurrentRequests = $this->config['concurrentRequests'] ?? 10;
+
+        $this->credentialsCacheSeconds = $this->config['credentials_cache_seconds'] ?? self::DEFAULT_CREDENTIALS_CACHE_SECONDS;
+
+        $this->cacheStore = $this->config['cache_store'] ?? null;
     }
 
     /**
@@ -191,23 +204,24 @@ class FcmV1 extends Fcm
 
     protected function getOauthToken()
     {
-        return Cache::remember(
-            Str::slug('fcm-v1-oauth-token-' . $this->config['projectId']),
-            Carbon::now()->addSeconds(self::CACHE_SECONDS),
-            function () {
-                $jsonFilePath = $this->config['jsonFile'];
+        return Cache::store($this->cacheStore)
+            ->remember(
+                Str::slug('fcm-v1-oauth-token-' . $this->config['projectId']),
+                Carbon::now()->addSeconds($this->credentialsCacheSeconds),
+                function () {
+                    $jsonFilePath = $this->config['jsonFile'];
 
-                $googleClient = new GoogleClient();
+                    $googleClient = new GoogleClient();
 
-                $googleClient->setAuthConfig($jsonFilePath);
-                $googleClient->addScope(FirebaseCloudMessaging::FIREBASE_MESSAGING);
+                    $googleClient->setAuthConfig($jsonFilePath);
+                    $googleClient->addScope(FirebaseCloudMessaging::FIREBASE_MESSAGING);
 
-                $accessToken = $googleClient->fetchAccessTokenWithAssertion();
+                    $accessToken = $googleClient->fetchAccessTokenWithAssertion();
 
-                $oauthToken = $accessToken['access_token'];
+                    $oauthToken = $accessToken['access_token'];
 
-                return $oauthToken;
-            }
-        );
+                    return $oauthToken;
+                }
+            );
     }
 }
