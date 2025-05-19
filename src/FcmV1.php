@@ -17,6 +17,8 @@ use Illuminate\Support\Str;
 
 class FcmV1 extends Fcm
 {
+    const BASE_URL = 'https://fcm.googleapis.com/v1/projects/';
+
     const DEFAULT_CREDENTIALS_CACHE_SECONDS = 55 * 60; // 55 minutes
 
     /**
@@ -47,7 +49,7 @@ class FcmV1 extends Fcm
     {
         $this->config = $this->initializeConfig('fcmv1');
 
-        $this->url = 'https://fcm.googleapis.com/v1/projects/' . $this->config['projectId'] . '/messages:send';
+        $this->url = self::BASE_URL . $this->config['projectId'] . '/messages:send';
 
         $this->client = new Client($this->config['guzzle'] ?? []);
 
@@ -75,7 +77,7 @@ class FcmV1 extends Fcm
     {
         $this->config['projectId'] = $projectId;
 
-        $this->url = 'https://fcm.googleapis.com/v1/projects/' . $this->config['projectId'] . '/messages:send';
+        $this->url = self::BASE_URL . $this->config['projectId'] . '/messages:send';
     }
 
     /**
